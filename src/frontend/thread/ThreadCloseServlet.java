@@ -1,6 +1,9 @@
 package frontend.thread;
 
+import helper.LoggerHelper;
 import mysql.MySqlConnect;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 
 import javax.servlet.ServletException;
@@ -13,6 +16,7 @@ import java.sql.SQLException;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadCloseServlet extends HttpServlet {
+    private final Logger logger = LogManager.getLogger(ThreadCloseServlet.class.getName());
 
     private MySqlConnect mySqlServer;
 
@@ -22,8 +26,8 @@ public class ThreadCloseServlet extends HttpServlet {
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        System.out.println("Post_create!");
-        JSONObject req = getJSONFromRequest(request, "PostCreate");
+        logger.info(LoggerHelper.start());
+        JSONObject req = getJSONFromRequest(request, "ThreadCloseServlet");
 
         short status = 0;
         String message = "";
@@ -34,6 +38,7 @@ public class ThreadCloseServlet extends HttpServlet {
         } else {
             status = 2;
             message = "Wrong json";
+            logger.info(message);
         }
 
         int result = 0;
@@ -42,18 +47,19 @@ public class ThreadCloseServlet extends HttpServlet {
         if (status == 0) {
             query = "update thread set isClosed = 1 where id = " + threadId + ";";
             result = mySqlServer.executeUpdate(query);
-            System.out.println("Strings affected: " + result);
-        }
-        if (result == 0) {
-            status = 1;
-            message = "No such post";
+            logger.info(LoggerHelper.resultUpdate(), result);
+            if (result == 0) {
+                status = 1;
+                message = "No such post";
+                logger.info(message);
+            }
         }
         try {
             createResponse(response, status, message, threadId);
         } catch (SQLException e) {
-            System.out.println("Error while creating response for PostCreate");
+            logger.info(LoggerHelper.responseCreating());
         }
-        System.out.println("Success!");
+        logger.info(LoggerHelper.finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, long threadId) throws IOException, SQLException {
@@ -70,6 +76,7 @@ public class ThreadCloseServlet extends HttpServlet {
         }
         obj.put("response", data);
         obj.put("code", status);
+        logger.info(LoggerHelper.responseJSON(), obj.toString());
         response.getWriter().write(obj.toString());
     }
 }

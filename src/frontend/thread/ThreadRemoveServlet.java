@@ -28,7 +28,7 @@ public class ThreadRemoveServlet extends HttpServlet {
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(LoggerHelper.start());
 
-        JSONObject req = getJSONFromRequest(request, "PostCreate");
+        JSONObject req = getJSONFromRequest(request, "ThreadRemoveServlet");
 
         short status = 0;
         String message = "";

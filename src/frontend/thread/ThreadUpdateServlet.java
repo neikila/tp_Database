@@ -68,10 +68,10 @@ public class ThreadUpdateServlet extends HttpServlet {
             logger.info(LoggerHelper.query(), query);
             result = mySqlServer.executeUpdate(query);
             logger.info(LoggerHelper.resultUpdate(), result);
-        }
-        if (result != 1) {
-            status = 2;
-            message = "No such thread";
+            if (result != 1) {
+                status = 2;
+                message = "No such thread";
+            }
         }
         try {
             createResponse(response, status, message, thread);

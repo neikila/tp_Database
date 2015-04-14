@@ -49,10 +49,15 @@ public class ThreadRestoreServlet extends HttpServlet {
             logger.info(LoggerHelper.query(), query);
             result = mySqlServer.executeUpdate(query);
             logger.info(LoggerHelper.resultUpdate(), result);
-        }
-        if (result == 0) {
-            status = 1;
-            message = "No such post";
+            if (result == 0) {
+                status = 1;
+                message = "No such post";
+            } else {
+                query = "update post set isDeleted = 0 where thread = " + threadId + ";";
+                logger.info(LoggerHelper.query(), query);
+                result = mySqlServer.executeUpdate(query);
+                logger.info(LoggerHelper.resultUpdate(), result);
+            }
         }
         try {
             createResponse(response, status, message, threadId);

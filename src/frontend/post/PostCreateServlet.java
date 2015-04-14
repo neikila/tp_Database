@@ -1,5 +1,6 @@
 package frontend.post;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -29,6 +30,9 @@ public class PostCreateServlet extends HttpServlet {
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(LoggerHelper.start());
         JSONObject req = getJSONFromRequest(request, "PostCreateServlet");
+        short status = 0;
+        String message = "";
+        //TODO Сюда нужен еще один валидатор
 
         boolean isDeleted = false;
         boolean isApproved = false;
@@ -52,19 +56,23 @@ public class PostCreateServlet extends HttpServlet {
             isSpam = (boolean) req.get("isSpam");
         }
 
-        int parent_id = 0;
-        if (req.containsKey("parent")) {
-            parent_id = (int)(long)req.get("parent");
+        long parent_id = 0;
+        try {
+            if (req.containsKey("parent")) {
+                parent_id = (long) req.get("parent");
+            }
+        } catch (Exception e) {
+            logger.info(e);
+            e.printStackTrace();
+            status = 3;
+            message = ErrorMessages.wrongJSONData();
         }
-
 
         String short_name = (String)req.get("forum");
         String email = (String)req.get("user");
         String messagePost = (String)req.get("message");
         int thread =  (int)(long)req.get("thread");
         String date = (String)req.get("date");
-        short status = 0;
-        String message = "";
         int result;
         ResultSet resultSet1 = null;
         Statement statement1 = mySqlServer.getStatement();
@@ -79,9 +87,11 @@ public class PostCreateServlet extends HttpServlet {
             try {
                 if(resultSet1.next()) {
                     mat_path = resultSet1.getString("parent") + String.format("_%03d", parent_id);
+                    logger.info(mat_path);
                 } else {
                     status = 4;
                     message = "There is no a such parent!";
+                    logger.info(message);
                 }
             } catch (SQLException e) {
                 logger.error(e);
@@ -161,7 +171,7 @@ public class PostCreateServlet extends HttpServlet {
 
             } else {
                 status = 4;
-                data.put("error", "Huston we have some problems in PostCreate");
+                data.put("error", "Error while PostCreate");
             }
         }
         obj.put("response", data);

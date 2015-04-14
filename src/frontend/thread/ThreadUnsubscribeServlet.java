@@ -28,7 +28,7 @@ public class ThreadUnsubscribeServlet extends HttpServlet {
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(LoggerHelper.start());
 
-        JSONObject req = getJSONFromRequest(request, "PostCreate");
+        JSONObject req = getJSONFromRequest(request, "ThreadUnsubscribeServlet");
 
         short status = 0;
         String message = "";
@@ -42,8 +42,8 @@ public class ThreadUnsubscribeServlet extends HttpServlet {
         }
 
         String email = null;
-        if (req.containsKey("email")) {
-            email = (String)req.get("email");
+        if (req.containsKey("user")) {
+            email = (String)req.get("user");
         } else {
             status = 2;
             message = "Wrong json";
@@ -57,10 +57,10 @@ public class ThreadUnsubscribeServlet extends HttpServlet {
             result = mySqlServer.executeUpdate(query);
             logger.info(LoggerHelper.query(), query);
             logger.info(LoggerHelper.resultUpdate(), result);
-        }
-        if (result == 0) {
-            status = 1;
-            message = "No such thread or user";
+            if (result == 0) {
+                status = 1;
+                message = "No such thread or user";
+            }
         }
         try {
             createResponse(response, status, message, threadId, email);

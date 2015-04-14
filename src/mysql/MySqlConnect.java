@@ -115,10 +115,10 @@ public class MySqlConnect {
             if(resultSet.next()) {
                 data.put("isAnonymous", resultSet.getBoolean("isAnonymous"));
                 data.put("email", resultSet.getString("email"));
-                data.put("about", resultSet.getString("about").equals("null")? null : resultSet.getString("about"));
-                data.put("name", resultSet.getString("name").equals("null")? null : resultSet.getString("name"));
+                data.put("about", resultSet.getString("about").equals("")? null : resultSet.getString("about"));
+                data.put("name", resultSet.getString("name").equals("")? null : resultSet.getString("name"));
 //                logger.info("Details {}", resultSet.getString("username"));
-                data.put("username", resultSet.getString("username").equals("null")? null : resultSet.getString("username") );
+                data.put("username", resultSet.getString("username").equals("")? null : resultSet.getString("username") );
                 data.put("id", resultSet.getInt("id"));
                 query = "select email from users join follow on followee_id = id where follower_id = " + resultSet.getInt("id") + ";";
                 followee = executeSelect(query, statement_followee);
@@ -203,9 +203,9 @@ public class MySqlConnect {
         } else {
             data.put("isAnonymous", resultSet.getBoolean("isAnonymous"));
             data.put("email", resultSet.getString("email"));
-            data.put("about", resultSet.getString("about").equals("null") ? null : resultSet.getString("about"));
-            data.put("name", resultSet.getString("name").equals("null") ? null : resultSet.getString("name"));
-            data.put("username", resultSet.getString("username").equals("null")? null : resultSet.getString("username") );
+            data.put("about", resultSet.getString("about").equals("") ? null : resultSet.getString("about"));
+            data.put("name", resultSet.getString("name").equals("") ? null : resultSet.getString("name"));
+            data.put("username", resultSet.getString("username").equals("")? null : resultSet.getString("username") );
             data.put("id", resultSet.getInt("id"));
             while(followee.next()) {
                 toFollow.add(followee.getString("email"));
@@ -367,7 +367,7 @@ public class MySqlConnect {
             }
 
         } else {
-            String message = "Huston we have some problems in PostCreate";
+            String message = "Error in  PostDetails";
             data.put("error", message);
             logger.error(message);
         }

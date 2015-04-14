@@ -92,7 +92,7 @@ public class ThreadCreateServlet extends HttpServlet {
                 data.put("date", resultSet.getString("date").substring(0,19));
             } else {
                 status = 4;
-                data.put("error", "Huston we have some problems in TreadCreate");
+                data.put("error", "Error while thread_create");
             }
         }
         obj.put("response", data);
