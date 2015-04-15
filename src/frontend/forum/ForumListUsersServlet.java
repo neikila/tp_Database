@@ -28,10 +28,11 @@ public class ForumListUsersServlet extends HttpServlet {
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(LoggerHelper.start());
+        logger.info(request.getParameterMap().toString());
 
         String forum = request.getParameter("forum");
         String asc = request.getParameter("order");
-        String since_id = request.getParameter("since");
+        String since_id = request.getParameter("since_id");
         String limit = request.getParameter("limit");
 
         short status = 0;
