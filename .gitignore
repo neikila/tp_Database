@@ -1,4 +1,3 @@
-*.class
 *~
 **/.idea/workspace.xml
 */.idea/tasks.xml
@@ -8,7 +7,6 @@
 .mtj.tmp/
 **/target/maven-status/*
 # Package Files #
-*.jar
 *.war
 *.ear
 

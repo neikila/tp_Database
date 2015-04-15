@@ -1,5 +1,6 @@
 package frontend.forum;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -40,7 +41,11 @@ public class ForumCreateServlet extends HttpServlet {
         try {
             result = mySqlServer.executeUpdate(query);
         } catch (Exception e) {
+            message = ErrorMessages.forumCreateError();
+            logger.info(message);
+            logger.error(e);
             result = 0;
+            status = 4;
         }
         logger.info(LoggerHelper.resultUpdate(), result);
         ResultSet resultSet = null;
@@ -49,9 +54,6 @@ public class ForumCreateServlet extends HttpServlet {
             query = "select email as user, short_name, forum.id, forum.name from forum join users on founder_id = users.id where forum.name = '" + req.get("name") + "';";
             logger.info(LoggerHelper.query(), query);
             resultSet = mySqlServer.executeSelect(query, statement);
-        } else {
-            message = "Such forum already exist or there is no such user!";
-            status = 4;
         }
         try {
             createResponse(response, status, message, resultSet);
@@ -67,11 +69,11 @@ public class ForumCreateServlet extends HttpServlet {
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
         response.setContentType("json;charset=UTF-8");
         response.setHeader("Cache-Control", "no-cache");
+        response.setStatus(HttpServletResponse.SC_OK);
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
         if (status != 0) {
-            response.setStatus(HttpServletResponse.SC_OK);
             data.put("error", message);
         } else {
             resultSet.next();

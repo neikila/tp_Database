@@ -13,4 +13,5 @@ public class ErrorMessages {
         return "Such user already exist!";
     }
 
+    public static String forumCreateError() { return "No such user or forum with such slug already exist"; }
 }

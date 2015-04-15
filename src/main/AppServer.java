@@ -2,6 +2,7 @@ package main;
 
 import frontend.AdminServlet;
 import frontend.ServiceClearServlet;
+import frontend.ServiceShutDownServlet;
 import frontend.forum.*;
 import frontend.post.*;
 import frontend.thread.*;
@@ -28,6 +29,7 @@ public class AppServer {
         String entity = "service";
         addServletToContext(context, new AdminServlet(), entity, "admin");
         context.addServlet(new ServletHolder(new ServiceClearServlet(mySqlServer)), "/db/api/clear/");
+        context.addServlet(new ServletHolder(new ServiceShutDownServlet()), "/shutDown");
 
         entity = "user";
         addServletToContext(context, new UserListServlet(mySqlServer), entity, "getAll");

@@ -1,6 +1,9 @@
 package frontend.thread;
 
+import helper.LoggerHelper;
 import mysql.MySqlConnect;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 
 import javax.servlet.ServletException;
@@ -15,6 +18,7 @@ import java.sql.Statement;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadCreateServlet extends HttpServlet {
+    private final Logger logger = LogManager.getLogger(ThreadCreateServlet.class.getName());
 
     private MySqlConnect mySqlServer;
 
@@ -24,7 +28,7 @@ public class ThreadCreateServlet extends HttpServlet {
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        System.out.println("Thread_create!");
+        logger.info(LoggerHelper.start());
         JSONObject req = getJSONFromRequest(request, "ThreadCreate");
         boolean isDeleted = false;
         if (req.containsKey("isDeleted")) {
@@ -50,8 +54,9 @@ public class ThreadCreateServlet extends HttpServlet {
                 "message = '" + messageThread + "', " +
                 "slug = '" + slug + "' " +
                 (isDeleted ? ", isDeleted = 1;" : ";");
+        logger.info(LoggerHelper.query(), query);
         result = mySqlServer.executeUpdate(query);
-        System.out.println("Strings affected: " + result);
+        logger.info(LoggerHelper.resultUpdate(), result);
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
         query = "select thread.date_of_creating as date, forum.name as forum, thread.id, isClosed, isDeleted, message, slug, title, email as user " +
@@ -60,14 +65,15 @@ public class ThreadCreateServlet extends HttpServlet {
                 "join forum on forum.id = forum_id " +
                 "where slug = '" + slug + "' and " +
                 "forum.short_name = '" + short_name + "';";
+        logger.info(LoggerHelper.query(), query);
         resultSet = mySqlServer.executeSelect(query, statement);
         try {
             createResponse(response, status, message, resultSet);
         } catch (SQLException e) {
-            System.out.println("Error while creating response for PostCreate");
+            logger.error(LoggerHelper.responseCreating());
         }
         mySqlServer.closeExecution(resultSet, statement);
-        System.out.println("Success!");
+        logger.info(LoggerHelper.finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {

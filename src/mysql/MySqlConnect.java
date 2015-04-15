@@ -133,7 +133,7 @@ public class MySqlConnect {
                 logger.error(message);
             }
         } catch (SQLException e) {
-            System.out.println(LoggerHelper.userDetailError());
+            logger.error(LoggerHelper.userDetailError());
         }
 
         JSONArray toFollow = new JSONArray();
@@ -191,7 +191,7 @@ public class MySqlConnect {
                 logger.error(message);
             }
         } catch (SQLException e) {
-            System.out.println(LoggerHelper.userDetailError());
+            logger.error(LoggerHelper.userDetailError());
         }
         JSONObject data = new JSONObject();
         JSONArray toFollow = new JSONArray();

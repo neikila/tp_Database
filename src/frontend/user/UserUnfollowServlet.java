@@ -71,7 +71,7 @@ public class UserUnfollowServlet extends HttpServlet {
                 message = "There is no user with such email!";
             }
         } catch (SQLException e) {
-            System.out.println("User Details error");
+            logger.error("User Details error");
         }
         try {
             createResponse(response, status, message, resultSet, followee, follower, subscription);

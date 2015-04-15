@@ -117,7 +117,7 @@ public class PostCreateServlet extends HttpServlet {
                             "isDeleted = " + (isDeleted ? 1 : 0) + ";";
             logger.info(LoggerHelper.query(), query);
             result = mySqlServer.executeUpdate(query);
-            System.out.println("Strings affected: " + result);
+            logger.info(LoggerHelper.resultUpdate(), result);
 
             query = "select post.id, post.date_of_creating as date, forum.name as forum, isAnonymous, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread, email as user " +
                     "from post " +
