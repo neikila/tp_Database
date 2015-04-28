@@ -100,6 +100,64 @@ public class MySqlConnect {
         }
     }
 
+    public String getForumNameById(int id) {
+        ResultSet resultSet1 = null;
+        Statement statement1 = getStatement();
+        String query = "select name from forum where id = " + id + ";";
+        resultSet1 = executeSelect(query, statement1);
+        String forumName = null;
+        try {
+            if(resultSet1.next()) {
+                forumName = resultSet1.getString("name");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e);
+        }
+        closeExecution(resultSet1, statement1);
+        return forumName;
+    }
+
+    public int getUserIdByEmail(String email) {
+        ResultSet preSet = null;
+        Statement preStatement = getStatement();
+        String query = "select id from users where email = '" + email + "';";
+        preSet = executeSelect(query, preStatement);
+        int userId = -1;
+
+        try {
+            if (preSet.next()) {
+                userId = preSet.getInt("id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e);
+        } finally {
+            closeExecution(preSet, preStatement);
+        }
+        return userId;
+    }
+
+    public int getForumIdByShortName(String forum) {
+        int forumId = -1;
+        ResultSet preSet;
+        Statement preStatement = getStatement();
+        String query = "select id from forum where short_name = '" + forum + "';";
+        preSet = executeSelect(query, preStatement);
+
+        try {
+            if (preSet.next()) {
+                forumId = preSet.getInt("id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e);
+        } finally {
+            closeExecution(preSet, preStatement);
+        }
+        return forumId;
+    }
+
     public JSONObject getUserDetail(String email) throws IOException, SQLException {
         String query, message = "";
         int status = 0;

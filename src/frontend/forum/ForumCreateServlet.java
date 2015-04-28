@@ -33,11 +33,13 @@ public class ForumCreateServlet extends HttpServlet {
         JSONObject req = getJSONFromRequest(request, "ForumCreateServlet");
         short status = 0;
         String message = "";
+        String email = (String)req.get("user");
+        String shortName = (String)req.get("short_name");
+        String forumName = (String)req.get("name");
         int result = 0;
-        String query = "insert into forum set founder_id = (select id from users where email = '" + req.get("user") + "'), " +
-                "name='" + req.get("name") + "', " +
-                "short_name='" + req.get("short_name") + "';\n";
-        logger.info(LoggerHelper.query(), query);
+        String query = "insert into forum set founder_id = " + mySqlServer.getUserIdByEmail(email) + ", " +
+                "name = '" + forumName + "', " +
+                "short_name = '" + shortName + "';\n";
         try {
             result = mySqlServer.executeUpdate(query);
         } catch (Exception e) {
@@ -51,8 +53,9 @@ public class ForumCreateServlet extends HttpServlet {
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
         if (result == 1) {
-            query = "select email as user, short_name, forum.id, forum.name from forum join users on founder_id = users.id where forum.name = '" + req.get("name") + "';";
-            logger.info(LoggerHelper.query(), query);
+            // TODO forum: short_name ; cover: id, name
+            query = "select '" + email + "' as user, short_name, forum.id, forum.name from forum " +
+                    "where forum.short_name = '" + shortName + "';";
             resultSet = mySqlServer.executeSelect(query, statement);
         }
         try {

@@ -49,12 +49,13 @@ public class ForumListPostsServlet extends HttpServlet {
         String query;
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
+        int forumId = mySqlServer.getForumIdByShortName(forum);
         // TODO index forum: short_name, id || post: forum_id, date_of_creating
         if (status == 0) {
-            query = "select p.id from forum f join post p on p.forum_id = f.id " +
-                    "where f.short_name = '" + forum + "' " +
-                    (since != null ? ("and p.date_of_creating > '" + since + "' ") : "") +
-                    "order by p.date_of_creating " +
+            query = "select id from post " +
+                    "where forum_id = '" + forumId + "' " +
+                    (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
+                    "order by date_of_creating " +
                     (asc == null ? ("desc ") : asc + " ") +
                     (limit != null ? ("limit " + limit) : "") +
                     ";";

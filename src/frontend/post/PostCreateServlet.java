@@ -32,6 +32,7 @@ public class PostCreateServlet extends HttpServlet {
         JSONObject req = getJSONFromRequest(request, "PostCreateServlet");
         short status = 0;
         String message = "";
+
         //TODO Сюда нужен еще один валидатор
 
         boolean isDeleted = false;
@@ -68,18 +69,18 @@ public class PostCreateServlet extends HttpServlet {
             message = ErrorMessages.wrongJSONData();
         }
 
-        String short_name = (String)req.get("forum");
+        String shortName = (String)req.get("forum");
         String email = (String)req.get("user");
         String messagePost = (String)req.get("message");
         int thread =  (int)(long)req.get("thread");
         String date = (String)req.get("date");
         int result;
-        ResultSet resultSet1 = null;
-        Statement statement1 = mySqlServer.getStatement();
 
         String query;
         String mat_path = "";
         if (parent_id != 0) {
+            ResultSet resultSet1 = null;
+            Statement statement1 = mySqlServer.getStatement();
             query = "select parent from post where id = " + parent_id + ";";
             logger.info(LoggerHelper.query(), query);
             resultSet1 = mySqlServer.executeSelect(query, statement1);
@@ -102,13 +103,16 @@ public class PostCreateServlet extends HttpServlet {
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
         if (status == 0) {
+            int authorId = mySqlServer.getUserIdByEmail(email);
+            int forumId = mySqlServer.getForumIdByShortName(shortName);
+            String forumName = mySqlServer.getForumNameById(forumId);
             query =
                     "insert into post set " +
                             "thread = " + thread + ", " +
                             "message = '" + messagePost + "', " +
-                            "author_id = (select id from users where email = '" + email + "'), " +
+                            "author_id = " + authorId +", " +
                             "date_of_creating = '" + date + "', " +
-                            "forum_id = (select id from forum where short_name = '" + short_name + "'), " +      //Проверка налчичия такого форума
+                            "forum_id = " + forumId + ", " +      //Проверка налчичия такого форума
                             "parent = '" + mat_path + "', " +
                             "isApproved = " + (isApproved ? 1 : 0) + ", " +
                             "isHighlighted = " + (isHighlighted ? 1 : 0)+ ", " +
@@ -119,15 +123,14 @@ public class PostCreateServlet extends HttpServlet {
             result = mySqlServer.executeUpdate(query);
             logger.info(LoggerHelper.resultUpdate(), result);
 
-            query = "select post.id, post.date_of_creating as date, forum.name as forum, isAnonymous, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread, email as user " +
+            query = "select post.id, post.date_of_creating as date, '" + forumName + "' as forum, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread, '" + email + "' as user " +
                     "from post " +
-                    "join forum on forum.id = forum_id " +
-                    "join users on users.id = author_id " +
-                    "where email = '" + email + "' and " +
+                    "where author_id = " + authorId + " and " +
                     "post.date_of_creating = '" + date + "';";
             logger.info(LoggerHelper.query(), query);
             resultSet = mySqlServer.executeSelect(query, statement);
         }
+
         try {
             createResponse(response, status, message, resultSet);
         } catch (SQLException e) {
@@ -136,7 +139,6 @@ public class PostCreateServlet extends HttpServlet {
             e.printStackTrace();
         }
         mySqlServer.closeExecution(resultSet, statement);
-        mySqlServer.closeExecution(resultSet1, statement1);
         logger.info(LoggerHelper.finish());
     }
 

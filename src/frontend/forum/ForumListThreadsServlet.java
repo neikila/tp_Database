@@ -41,14 +41,16 @@ public class ForumListThreadsServlet extends HttpServlet {
         short status = 0;
         String message = "";
 
+        int forumId = mySqlServer.getForumIdByShortName(forum);
+
         String query;
         ResultSet resultSet;
         Statement statement = mySqlServer.getStatement();
         // TODO index forum: short_name, id || thread: forum_id, date_of_creating
-        query = "select t.id from thread t join forum f on t.forum_id = f.id " +
-                "where f.short_name = '" + forum + "' " +
-                (since != null?("and t.date_of_creating > '" + since + "' "):"") +
-                "order by t.date_of_creating " +
+        query = "select id from thread t " +
+                "where forum_id = '" + forumId + "' " +
+                (since != null?("and date_of_creating > '" + since + "' "):"") +
+                "order by date_of_creating " +
                 (asc == null?("desc "):asc + " ") +
                 (limit != null?("limit " + limit):"") +
                 ";";

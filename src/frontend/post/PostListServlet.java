@@ -47,14 +47,24 @@ public class PostListServlet extends HttpServlet {
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
         if (status == 0) {
-            query = "select id from post " +
-                    (forum != null ? "where forum_id = (select id from forum where short_name = '" + forum + "') "
-                            : "where thread = " + Integer.parseInt(thread_str) + " ") +
-                    (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
-                    "order by date_of_creating " +
-                    (asc == null ? ("desc ") : asc + " ") +
-                    (limit != null ? ("limit " + limit) : "") +
-                    ";";
+            if(forum == null) {
+                query = "select id from post " +
+                        "where thread = " + Integer.parseInt(thread_str) + " " +
+                        (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
+                        "order by date_of_creating " +
+                        (asc == null ? ("desc ") : asc + " ") +
+                        (limit != null ? ("limit " + limit) : "") +
+                        ";";
+            } else {
+                int forumId = mySqlServer.getForumIdByShortName(forum);
+                query = "select id from post " +
+                        "where forum_id = " + forumId + " " +
+                        (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
+                        "order by date_of_creating " +
+                        (asc == null ? ("desc ") : asc + " ") +
+                        (limit != null ? ("limit " + limit) : "") +
+                        ";";
+            }
             logger.info(LoggerHelper.query(), query);
             resultSet = mySqlServer.executeSelect(query, statement);
         }
