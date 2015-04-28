@@ -41,11 +41,13 @@ public class ForumListUsersServlet extends HttpServlet {
         String query;
         ResultSet resultSet;
         Statement statement = mySqlServer.getStatement();
-        query = "select author_id from " +
-                "(select distinct author_id from post where forum_id = " +
-                "(select id from forum where short_name = '" + forum + "')) as a join users on a.author_id = users.id " +
-                (since_id != null?("where users.id > '" + since_id + "' "):"") +
-                "order by name " +
+        // TODO index forum: short_name, id || user: id, name || post: forum_id, author_id
+        query = "select distinct p.author_id from post p " +
+                "join forum f on p.forum_id = f.id " +
+                "join users u on p.author_id = u.id " +
+                "where f.short_name = '" + forum + "' " +
+                (since_id != null?("and p.author_id > '" + since_id + "' "):"") +
+                "order by u.name " +
                 (asc == null?("desc "):asc + " ") +
                 (limit != null?("limit " + limit):"") +
                 ";";

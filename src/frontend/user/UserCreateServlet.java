@@ -75,8 +75,6 @@ public class UserCreateServlet extends HttpServlet {
             logger.error(LoggerHelper.responseCreating());
             logger.error(e);
             e.printStackTrace();
-            logger.error(e);
-            e.printStackTrace();
         }
         mySqlServer.closeExecution(resultSet, statement);
         logger.info(LoggerHelper.finish());
