@@ -69,6 +69,10 @@ public class LoggerHelper {
         return "JSON from request: {}";
     }
 
+    public static String noUserOrForum() {
+        return "No such user or forum";
+    }
+
     public static String errorWhileReadingJSON() {
         return "Error while reading the JSON in {}";
     }

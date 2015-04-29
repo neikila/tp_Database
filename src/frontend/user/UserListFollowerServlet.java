@@ -1,5 +1,6 @@
 package frontend.user;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -33,7 +34,7 @@ public class UserListFollowerServlet extends HttpServlet {
         String since_id = request.getParameter("since");
         String limit = request.getParameter("limit");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         String query;
@@ -69,7 +70,7 @@ public class UserListFollowerServlet extends HttpServlet {
         JSONObject data = new JSONObject();
         JSONArray iAmFollowed = new JSONArray();
 
-        if (status != 0 || resultSet == null) {
+        if (status != ErrorMessages.ok || resultSet == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             data.put("error", message);
             obj.put("response", data);

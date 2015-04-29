@@ -1,5 +1,6 @@
 package frontend.user;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -27,7 +28,7 @@ public class UserDetailsServlet extends HttpServlet {
         logger.info(LoggerHelper.start());
         String email = request.getParameter("user");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
 
         try {
             createResponse(response, status, email);

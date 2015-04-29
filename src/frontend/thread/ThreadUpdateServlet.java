@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +31,7 @@ public class ThreadUpdateServlet extends HttpServlet {
 
         JSONObject req = getJSONFromRequest(request, "PostUpdate");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         long thread= 0;
@@ -90,7 +91,7 @@ public class ThreadUpdateServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             data = mySqlServer.getThreadDetailsById((int)thread, false, false);

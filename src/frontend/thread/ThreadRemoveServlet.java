@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +31,7 @@ public class ThreadRemoveServlet extends HttpServlet {
 
         JSONObject req = getJSONFromRequest(request, "ThreadRemoveServlet");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         long threadId= 0;
@@ -51,8 +52,8 @@ public class ThreadRemoveServlet extends HttpServlet {
             logger.info(LoggerHelper.resultUpdate(), result);
 
             if (result == 0) {
-                status = 1;
-                message = "No such post";
+                status = ErrorMessages.noRequestedObject;
+                message = ErrorMessages.noPost();
             } else {
                 query = "update post set isDeleted = 1 where thread = " + threadId + ";";
                 logger.info(LoggerHelper.query(), query);
@@ -77,7 +78,7 @@ public class ThreadRemoveServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             data.put("thread", threadId);

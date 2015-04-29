@@ -1,5 +1,6 @@
 package frontend.post;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -28,7 +29,7 @@ public class PostUpdateServlet extends HttpServlet {
         logger.info(LoggerHelper.start());
         JSONObject req = getJSONFromRequest(request, "PostUpdate");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         String messagePost = "";
@@ -78,7 +79,7 @@ public class PostUpdateServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             data = mySqlServer.getPostDetails((int)postId, false, false, false);

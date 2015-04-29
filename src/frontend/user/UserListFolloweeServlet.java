@@ -1,5 +1,6 @@
 package frontend.user;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -33,15 +34,17 @@ public class UserListFolloweeServlet extends HttpServlet {
         String since_id = request.getParameter("since");
         String limit = request.getParameter("limit");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         String query;
         ResultSet resultSet;
         Statement statement = mySqlServer.getStatement();
 
-        query = "select id from users join follow on id = followee_id where follower_id = " +
-                "(select id from users where email = '" + email + "') " +
+        int userId = mySqlServer.getUserIdByEmail(email);
+
+        // TODO загнать в follow
+        query = "select id from users join follow on id = followee_id where follower_id = " + userId + " " +
                 (since_id != null?("and id > '" + since_id + "' "):"") +
                 "order by name " +
                 (asc == null?("desc "):asc + " ") +
@@ -69,7 +72,7 @@ public class UserListFolloweeServlet extends HttpServlet {
         JSONObject data = new JSONObject();
         JSONArray iFollow = new JSONArray();
 
-        if (status != 0 || resultSet == null) {
+        if (status != ErrorMessages.ok || resultSet == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             data.put("error", message);
             obj.put("response", data);
@@ -80,8 +83,8 @@ public class UserListFolloweeServlet extends HttpServlet {
             if (iFollow.size() > 0) {
                 obj.put("response", iFollow);
             } else {
-                status = 1;
-                data.put("error", message);
+                status = ErrorMessages.noRequestedObject;
+                data.put("error", ErrorMessages.noUser());
                 obj.put("response", data);
             }
         }

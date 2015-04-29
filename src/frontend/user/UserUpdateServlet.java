@@ -1,5 +1,6 @@
 package frontend.user;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -33,7 +34,7 @@ public class UserUpdateServlet extends HttpServlet {
 
         JSONObject req = getJSONFromRequest(request, "UserCreate");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
         int result;
         String query = "update users set about = '" + req.get("about") + "', " +
@@ -49,8 +50,8 @@ public class UserUpdateServlet extends HttpServlet {
             logger.info(LoggerHelper.query(), query);
             resultSet = mySqlServer.executeSelect(query, statement);
         } else {
-            message = "Something gone wrong!";
-            status = 4;
+            status = ErrorMessages.noRequestedObject;
+            message = ErrorMessages.noUser();
         }
 
         ResultSet followee = null, follower = null, subscription = null;
@@ -69,11 +70,11 @@ public class UserUpdateServlet extends HttpServlet {
             }
             else {
                 resultSet = null;
-                status = 1;
-                message = "There is no user with such email!";
+                status = ErrorMessages.noRequestedObject;
+                message = ErrorMessages.noUser();
             }
         } catch (SQLException e) {
-            logger.error("User Details error");
+            logger.error(LoggerHelper.userDetailError());
         }
         try {
             createResponse(response, status, message, resultSet, followee, follower, subscription);
@@ -87,7 +88,6 @@ public class UserUpdateServlet extends HttpServlet {
         mySqlServer.closeExecution(follower, statement_follower);
         mySqlServer.closeExecution(subscription, statement_subscription);
         logger.info(LoggerHelper.finish());
-
     }
 
 
@@ -102,7 +102,7 @@ public class UserUpdateServlet extends HttpServlet {
         JSONArray iAmFollowed = new JSONArray();
         JSONArray subscribed = new JSONArray();
 
-        if (status != 0 || resultSet == null) {
+        if (status != ErrorMessages.ok || resultSet == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             data.put("error", message);
         } else {

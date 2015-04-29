@@ -1,5 +1,6 @@
 package frontend.post;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -26,7 +27,7 @@ public class PostDetailsServlet extends HttpServlet {
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(LoggerHelper.start());
-        short status = 0;
+        short status = ErrorMessages.ok;
         Map<String, String[]> paramMap = request.getParameterMap();
         int id = Integer.parseInt(paramMap.containsKey("post") ? paramMap.get("post")[0] : "0");
         if (id == 0) {

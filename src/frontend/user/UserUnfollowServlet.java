@@ -1,5 +1,6 @@
 package frontend.user;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -41,7 +42,7 @@ public class UserUnfollowServlet extends HttpServlet {
         logger.info(LoggerHelper.query(), query);
         int result = mySqlServer.executeUpdate(query);
         logger.info(LoggerHelper.resultUpdate(), result);
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         ResultSet resultSet;
@@ -97,7 +98,7 @@ public class UserUnfollowServlet extends HttpServlet {
         JSONArray iAmFollowed = new JSONArray();
         JSONArray subscribed = new JSONArray();
 
-        if (status != 0 || resultSet == null) {
+        if (status != ErrorMessages.ok || resultSet == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             data.put("error", message);
         } else {

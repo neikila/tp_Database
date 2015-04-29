@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -29,15 +30,15 @@ public class ThreadCloseServlet extends HttpServlet {
         logger.info(LoggerHelper.start());
         JSONObject req = getJSONFromRequest(request, "ThreadCloseServlet");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         long threadId= 0;
         if (req.containsKey("thread")) {
             threadId = (long)req.get("thread");
         } else {
-            status = 2;
-            message = "Wrong json";
+            status = ErrorMessages.notValidRequest;
+            message = ErrorMessages.wrongJSONData();
             logger.info(message);
         }
 
@@ -49,8 +50,8 @@ public class ThreadCloseServlet extends HttpServlet {
             result = mySqlServer.executeUpdate(query);
             logger.info(LoggerHelper.resultUpdate(), result);
             if (result == 0) {
-                status = 1;
-                message = "No such post";
+                status = ErrorMessages.noRequestedObject;
+                message = ErrorMessages.noPost();
                 logger.info(message);
             }
         }
@@ -69,7 +70,7 @@ public class ThreadCloseServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             data.put("thread", threadId);

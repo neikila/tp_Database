@@ -5,6 +5,7 @@ package mysql;
  */
 
 import com.sun.istack.internal.Nullable;
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -160,7 +161,7 @@ public class MySqlConnect {
 
     public JSONObject getUserDetail(String email) throws IOException, SQLException {
         String query, message = "";
-        int status = 0;
+        int status = ErrorMessages.ok;
         ResultSet resultSet;
         Statement statement = getStatement();
 
@@ -198,7 +199,7 @@ public class MySqlConnect {
         JSONArray iAmFollowed = new JSONArray();
         JSONArray subscribed = new JSONArray();
 
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             while(followee.next()) {
@@ -225,7 +226,7 @@ public class MySqlConnect {
 
     public JSONObject getUserDetail(int id) throws IOException, SQLException {
         String query, message = "";
-        int status = 0;
+        int status = ErrorMessages.ok;
         ResultSet resultSet;
         Statement statement = getStatement();
 
@@ -256,7 +257,7 @@ public class MySqlConnect {
         JSONArray iAmFollowed = new JSONArray();
         JSONArray subscribed = new JSONArray();
 
-        if (status != 0 || resultSet == null) {
+        if (status != ErrorMessages.ok || resultSet == null) {
             data.put("error", message);
         } else {
             data.put("isAnonymous", resultSet.getBoolean("isAnonymous"));
@@ -297,7 +298,7 @@ public class MySqlConnect {
                 "where short_name = '" + short_name +"';";
         resultSet = executeSelect(query, statement);
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
         JSONObject data = new JSONObject();
         if (resultSet.next()) {

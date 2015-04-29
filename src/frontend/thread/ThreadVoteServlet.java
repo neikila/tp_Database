@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +30,7 @@ public class ThreadVoteServlet extends HttpServlet {
 
         JSONObject req = getJSONFromRequest(request, "Thread_vote");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         long threadId = 0;
@@ -61,10 +62,12 @@ public class ThreadVoteServlet extends HttpServlet {
             result = mySqlServer.executeUpdate(query);
             logger.info(LoggerHelper.resultUpdate(), result);
         }
+
         if (result == 0) {
-            status = 1;
-            message = "No such post";
+            status = ErrorMessages.noRequestedObject;
+            message = ErrorMessages.noPost();
         }
+
         try {
             createResponse(response, status, message, threadId);
         } catch (SQLException e) {
@@ -82,7 +85,7 @@ public class ThreadVoteServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             data = mySqlServer.getThreadDetailsById((int)threadId, false, false);

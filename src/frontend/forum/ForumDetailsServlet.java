@@ -1,5 +1,6 @@
 package frontend.forum;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -28,11 +29,11 @@ public class ForumDetailsServlet extends HttpServlet {
         String forum = request.getParameter("forum");
         String related = request.getParameter("related");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         if (related != null && !related.equals("user")) {
-            status = 4;
+            status = ErrorMessages.wrongData;
             message = "Wrong argument related";
         }
 

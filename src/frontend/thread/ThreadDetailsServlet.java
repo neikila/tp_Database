@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +30,7 @@ public class ThreadDetailsServlet extends HttpServlet {
 
         String thread = request.getParameter("thread");
         String[] related = paramMap.get("related");
-        short status = 0;
+        short status = ErrorMessages.ok;
 
         try {
             createResponse(response, status, thread, related);

@@ -1,5 +1,6 @@
 package frontend.post;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +30,7 @@ public class PostListServlet extends HttpServlet {
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(LoggerHelper.start());
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         String forum = request.getParameter("forum");
@@ -88,7 +89,7 @@ public class PostListServlet extends HttpServlet {
         JSONObject obj = new JSONObject();
         JSONArray listPosts = new JSONArray();
 
-        if (status != 0 || resultSet == null) {
+        if (status != ErrorMessages.ok || resultSet == null) {
             JSONObject data = new JSONObject();
             data.put("error", message);
             obj.put("response", data);

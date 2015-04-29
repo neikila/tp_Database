@@ -1,5 +1,6 @@
 package frontend.user;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +31,7 @@ public class UserListPostsServlet extends HttpServlet {
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(LoggerHelper.start());
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
@@ -70,11 +71,12 @@ public class UserListPostsServlet extends HttpServlet {
                 postList.add(post);
             }
         } else {
-            status = 4;
+            status = ErrorMessages.noRequestedObject;
+            message = ErrorMessages.noPost();
         }
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
             obj.put("response", data);
         } else {

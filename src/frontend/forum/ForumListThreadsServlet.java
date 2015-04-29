@@ -38,7 +38,7 @@ public class ForumListThreadsServlet extends HttpServlet {
         String limit = paramMap.containsKey("limit") ? paramMap.get("limit")[0] : null;
         String[] related = paramMap.get("related");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         int forumId = mySqlServer.getForumIdByShortName(forum);
@@ -78,7 +78,7 @@ public class ForumListThreadsServlet extends HttpServlet {
 
         JSONArray listThreads = new JSONArray();
 
-        if (status != 0 || resultSet == null) {
+        if (status != ErrorMessages.ok || resultSet == null) {
             data.put("error", message);
             obj.put("response", data);
         } else {

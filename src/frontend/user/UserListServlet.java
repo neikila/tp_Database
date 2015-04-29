@@ -1,5 +1,6 @@
 package frontend.user;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +31,7 @@ public class UserListServlet extends HttpServlet {
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(LoggerHelper.start());
-        short status = 200;
+        short status = ErrorMessages.ok;
         String message = "";
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
@@ -47,6 +48,7 @@ public class UserListServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
+        response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("json;charset=UTF-8");
         response.setHeader("Cache-Control", "no-cache");
 
@@ -67,12 +69,10 @@ public class UserListServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 200) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             data.put("userList", userList);
-            response.setStatus(HttpServletResponse.SC_OK);
         }
         obj.put("response", data);
         obj.put("code", status);

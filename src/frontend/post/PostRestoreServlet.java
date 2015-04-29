@@ -1,5 +1,6 @@
 package frontend.post;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +30,7 @@ public class PostRestoreServlet extends HttpServlet {
         logger.info(LoggerHelper.start());
         JSONObject req = getJSONFromRequest(request, "PostCreate");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         long postId = 0;
@@ -49,8 +50,8 @@ public class PostRestoreServlet extends HttpServlet {
             logger.info(LoggerHelper.resultUpdate(), result);
         }
         if (result == 0) {
-            status = 4; //TODO check status/ No such post
-            message = "No such post";
+            status = ErrorMessages.noRequestedObject; //TODO check status/ No such post
+            message = ErrorMessages.noPost();
         }
         try {
             createResponse(response, status, message, postId);
@@ -69,7 +70,7 @@ public class PostRestoreServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             data.put("post", postId);

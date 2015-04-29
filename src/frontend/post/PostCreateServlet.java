@@ -30,7 +30,7 @@ public class PostCreateServlet extends HttpServlet {
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(LoggerHelper.start());
         JSONObject req = getJSONFromRequest(request, "PostCreateServlet");
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         //TODO Сюда нужен еще один валидатор
@@ -77,7 +77,7 @@ public class PostCreateServlet extends HttpServlet {
         int result;
 
         String query;
-        String mat_path = "";
+        String matPath = "";
         if (parent_id != 0) {
             ResultSet resultSet1 = null;
             Statement statement1 = mySqlServer.getStatement();
@@ -87,11 +87,16 @@ public class PostCreateServlet extends HttpServlet {
 
             try {
                 if(resultSet1.next()) {
-                    mat_path = resultSet1.getString("parent") + String.format("_%03d", parent_id);
-                    logger.info(mat_path);
+                    String parent = resultSet1.getString("parent");
+                    if (parent.equals("")) {
+                        matPath = String.format("%03d", parent_id);
+                    } else {
+                        matPath = parent + String.format("_%03d", parent_id);
+                    }
+                    logger.info(matPath);
                 } else {
-                    status = 4;
-                    message = "There is no a such parent!";
+                    status = ErrorMessages.noRequestedObject;
+                    message = ErrorMessages.noParent();
                     logger.info(message);
                 }
             } catch (SQLException e) {
@@ -105,32 +110,38 @@ public class PostCreateServlet extends HttpServlet {
         if (status == 0) {
             int authorId = mySqlServer.getUserIdByEmail(email);
             int forumId = mySqlServer.getForumIdByShortName(shortName);
-            String forumName = mySqlServer.getForumNameById(forumId);
-            query =
-                    "insert into post set " +
-                            "thread = " + thread + ", " +
-                            "message = '" + messagePost + "', " +
-                            "author_id = " + authorId +", " +
-                            "date_of_creating = '" + date + "', " +
-                            "forum_id = " + forumId + ", " +      //Проверка налчичия такого форума
-                            "parent = '" + mat_path + "', " +
-                            "isApproved = " + (isApproved ? 1 : 0) + ", " +
-                            "isHighlighted = " + (isHighlighted ? 1 : 0)+ ", " +
-                            "isEdited = " + (isEdited ? 1 : 0) + ", " +
-                            "isSpam = " + (isSpam ? 1 : 0) + ", " +
-                            "isDeleted = " + (isDeleted ? 1 : 0) + ";";
-            logger.info(LoggerHelper.query(), query);
-            result = mySqlServer.executeUpdate(query);
-            logger.info(LoggerHelper.resultUpdate(), result);
+            // TODO Проверка налчичия такого форума
+            if (forumId > 0 && authorId > 0) {
+                String forumName = mySqlServer.getForumNameById(forumId);
+                query =
+                        "insert into post set " +
+                                "thread = " + thread + ", " +
+                                "message = '" + messagePost + "', " +
+                                "author_id = " + authorId + ", " +
+                                "date_of_creating = '" + date + "', " +
+                                "forum_id = " + forumId + ", " +
+                                "parent = '" + matPath + "', " +
+                                "isApproved = " + (isApproved ? 1 : 0) + ", " +
+                                "isHighlighted = " + (isHighlighted ? 1 : 0) + ", " +
+                                "isEdited = " + (isEdited ? 1 : 0) + ", " +
+                                "isSpam = " + (isSpam ? 1 : 0) + ", " +
+                                "isDeleted = " + (isDeleted ? 1 : 0) + ";";
+                logger.info(LoggerHelper.query(), query);
+                result = mySqlServer.executeUpdate(query);
+                logger.info(LoggerHelper.resultUpdate(), result);
 
-            query = "select post.id, post.date_of_creating as date, '" + forumName + "' as forum, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread, '" + email + "' as user " +
-                    "from post " +
-                    "where author_id = " + authorId + " and " +
-                    "post.date_of_creating = '" + date + "';";
-            logger.info(LoggerHelper.query(), query);
-            resultSet = mySqlServer.executeSelect(query, statement);
+                query = "select post.id, post.date_of_creating as date, '" + forumName + "' as forum, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread, '" + email + "' as user " +
+                        "from post " +
+                        "where author_id = " + authorId + " and " +
+                        "post.date_of_creating = '" + date + "';";
+                logger.info(LoggerHelper.query(), query);
+                resultSet = mySqlServer.executeSelect(query, statement);
+            } else {
+                status = ErrorMessages.noRequestedObject;
+                message = ErrorMessages.noForum();
+                logger.info(LoggerHelper.noUserOrForum());
+            }
         }
-
         try {
             createResponse(response, status, message, resultSet);
         } catch (SQLException e) {
@@ -149,7 +160,7 @@ public class PostCreateServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             if (resultSet.next()) {
@@ -172,7 +183,7 @@ public class PostCreateServlet extends HttpServlet {
                 data.put("user", resultSet.getString("user"));
 
             } else {
-                status = 4;
+                status = ErrorMessages.noRequestedObject;
                 data.put("error", "Error while PostCreate");
             }
         }

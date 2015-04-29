@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -41,7 +42,7 @@ public class ThreadCreateServlet extends HttpServlet {
         String messageThread = (String)req.get("message");
         String slug = (String)req.get("slug");
         String date = (String)req.get("date");
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
         int result;
         String query =
@@ -83,7 +84,7 @@ public class ThreadCreateServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             if (resultSet.next()) {
@@ -97,8 +98,8 @@ public class ThreadCreateServlet extends HttpServlet {
                 data.put("user", resultSet.getString("user"));
                 data.put("date", resultSet.getString("date").substring(0,19));
             } else {
-                status = 4;
-                data.put("error", "Error while thread_create");
+                status = ErrorMessages.noRequestedObject;
+                data.put("error", ErrorMessages.noThread());
             }
         }
         obj.put("response", data);

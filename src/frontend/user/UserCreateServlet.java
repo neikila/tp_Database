@@ -37,7 +37,7 @@ public class UserCreateServlet extends HttpServlet {
             isAnonymous = (boolean) req.get("isAnonymous");
         }
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         if (!Validator.userValidation(req)) {
@@ -86,7 +86,7 @@ public class UserCreateServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_OK);
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0 && status != 5) {
+        if (status != ErrorMessages.ok && status != 5) {
             data.put("error", message);
         } else {
             resultSet.next();

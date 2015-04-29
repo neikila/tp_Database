@@ -1,5 +1,6 @@
 package frontend.user;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -40,7 +41,7 @@ public class UserFollowServlet extends HttpServlet {
         logger.info(LoggerHelper.query(), query);
         int result = mySqlServer.executeUpdate(query);
         logger.info(LoggerHelper.resultUpdate(), result);
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         ResultSet resultSet;
@@ -53,6 +54,7 @@ public class UserFollowServlet extends HttpServlet {
         ResultSet followee = null, follower = null, subscription = null;
         Statement statement_followee = mySqlServer.getStatement(), statement_follower = mySqlServer.getStatement(), statement_subscription = mySqlServer.getStatement();
         try {
+            // TODO check документацию возможно тут стоит заменить на details
             if(resultSet.next()) {
                 query = "select email from users join follow on followee_id = id where follower_id = " + resultSet.getInt("id") + ";";
                 logger.info(LoggerHelper.query(), query);
@@ -66,8 +68,8 @@ public class UserFollowServlet extends HttpServlet {
             }
             else {
                 resultSet = null;
-                status = 1;
-                message = "There is no user with such email!";
+                status = ErrorMessages.noRequestedObject;
+                message = ErrorMessages.noUser();
                 logger.info(message);
             }
         } catch (SQLException e) {
@@ -97,7 +99,7 @@ public class UserFollowServlet extends HttpServlet {
         JSONArray iAmFollowed = new JSONArray();
         JSONArray subscribed = new JSONArray();
 
-        if (status != 0 || resultSet == null) {
+        if (status != ErrorMessages.ok || resultSet == null) {
             data.put("error", message);
         } else {
             data.put("isAnonymous", resultSet.getBoolean("isAnonymous"));

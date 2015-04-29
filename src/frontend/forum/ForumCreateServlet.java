@@ -31,7 +31,7 @@ public class ForumCreateServlet extends HttpServlet {
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(LoggerHelper.start());
         JSONObject req = getJSONFromRequest(request, "ForumCreateServlet");
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
         String email = (String)req.get("user");
         String shortName = (String)req.get("short_name");
@@ -43,11 +43,11 @@ public class ForumCreateServlet extends HttpServlet {
         try {
             result = mySqlServer.executeUpdate(query);
         } catch (Exception e) {
-            message = ErrorMessages.forumCreateError();
-            logger.info(message);
             logger.error(e);
             result = 0;
-            status = 4;
+            status = ErrorMessages.unknownError;
+            message = ErrorMessages.forumCreateError();
+            logger.info(message);
         }
         logger.info(LoggerHelper.resultUpdate(), result);
         ResultSet resultSet = null;
@@ -76,7 +76,7 @@ public class ForumCreateServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             resultSet.next();

@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +30,7 @@ public class ThreadSubscribeServlet extends HttpServlet {
 
         JSONObject req = getJSONFromRequest(request, "PostCreate");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         long threadId= 0;
@@ -53,14 +54,20 @@ public class ThreadSubscribeServlet extends HttpServlet {
         int result = 0;
         String query;
 
-        if (status == 0) {
-            query = "insert into subscribtion set user_id = (select id from users where email = '" + email + "'), thread_id = " + threadId + ";";
+        int userId = mySqlServer.getUserIdByEmail(email);
+        if (userId < 1) {
+            status = ErrorMessages.noRequestedObject;
+            message = ErrorMessages.noUser();
+        }
+
+        if (status == ErrorMessages.ok) {
+            query = "insert into subscribtion set user_id = " + userId + " , thread_id = " + threadId + ";";
             result = mySqlServer.executeUpdate(query);
             logger.info(LoggerHelper.query(), query);
             logger.info(LoggerHelper.resultUpdate(), result);
             if (result == 0) {
-                status = 1;
-                message = "No such thread or user";
+                status = ErrorMessages.noRequestedObject;
+                message = ErrorMessages.noThread();
             }
         }
         try {
@@ -80,7 +87,7 @@ public class ThreadSubscribeServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             data.put("thread", threadId);

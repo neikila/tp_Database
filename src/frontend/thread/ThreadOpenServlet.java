@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +31,7 @@ public class ThreadOpenServlet extends HttpServlet {
 
         JSONObject req = getJSONFromRequest(request, "PostCreate");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         long threadId= 0;
@@ -51,8 +52,8 @@ public class ThreadOpenServlet extends HttpServlet {
             logger.info(LoggerHelper.resultUpdate(), result);
         }
         if (result == 0) {
-            status = 1;
-            message = "No such post";
+            status = ErrorMessages.noRequestedObject;
+            message = ErrorMessages.noPost();
         }
         try {
             createResponse(response, status, message, threadId);
@@ -71,7 +72,7 @@ public class ThreadOpenServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             data.put("thread", threadId);

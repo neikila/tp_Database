@@ -1,5 +1,6 @@
 package frontend.post;
 
+import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -28,7 +29,7 @@ public class PostVoteServlet extends HttpServlet {
         logger.info(LoggerHelper.start());
         JSONObject req = getJSONFromRequest(request, "PostCreate");
 
-        short status = 0;
+        short status = ErrorMessages.ok;
         String message = "";
 
         long postId = 0;
@@ -60,8 +61,8 @@ public class PostVoteServlet extends HttpServlet {
             result = mySqlServer.executeUpdate(query);
             logger.info(LoggerHelper.resultUpdate(), result);
             if (result == 0) {
-                status = 1;
-                message = "No such post";
+                status = ErrorMessages.noRequestedObject;
+                message = ErrorMessages.noPost();
             }
         }
         try {
@@ -81,7 +82,7 @@ public class PostVoteServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != 0) {
+        if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
             data = mySqlServer.getPostDetails((int)postId, false, false, false);
