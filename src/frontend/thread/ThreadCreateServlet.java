@@ -1,7 +1,6 @@
 package frontend.thread;
 
 import helper.ErrorMessages;
-import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,6 +15,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static helper.ErrorMessages.ok;
+import static helper.LoggerHelper.*;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadCreateServlet extends HttpServlet {
@@ -29,35 +30,34 @@ public class ThreadCreateServlet extends HttpServlet {
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
         JSONObject req = getJSONFromRequest(request, "ThreadCreate");
         boolean isDeleted = false;
         if (req.containsKey("isDeleted")) {
             isDeleted = (boolean) req.get("isDeleted");
         }
-        String short_name = (String)req.get("forum");
-        String title = (String)req.get("title");
-        boolean isClosed = (boolean)req.get("isClosed");
-        String user = (String)req.get("user");
-        String messageThread = (String)req.get("message");
-        String slug = (String)req.get("slug");
-        String date = (String)req.get("date");
-        short status = ErrorMessages.ok;
+        String short_name = (String) req.get("forum");
+        String title = (String) req.get("title");
+        boolean isClosed = (boolean) req.get("isClosed");
+        String user = (String) req.get("user");
+        String messageThread = (String) req.get("message");
+        String slug = (String) req.get("slug");
+        String date = (String) req.get("date");
+        short status = ok;
         String message = "";
         int result;
         String query =
                 "insert into thread set " +
-                "forum_id = (select id from forum where short_name = '" + short_name + "'), " +
-                "title = '" + title + "', " +
-                "isClosed = " + (isClosed ? 1 : 0) + ", " +
-                "founder_id = (select id from users where email = '" + user + "'), " +
-                "date_of_creating = '" + date + "', " +
-                "message = '" + messageThread + "', " +
-                "slug = '" + slug + "' " +
-                (isDeleted ? ", isDeleted = 1;" : ";");
-        logger.info(LoggerHelper.query(), query);
+                        "forum_id = (select id from forum where short_name = '" + short_name + "'), " +
+                        "title = '" + title + "', " +
+                        "isClosed = " + (isClosed ? 1 : 0) + ", " +
+                        "founder_id = (select id from users where email = '" + user + "'), " +
+                        "date_of_creating = '" + date + "', " +
+                        "message = '" + messageThread + "', " +
+                        "slug = '" + slug + "' " +
+                        (isDeleted ? ", isDeleted = 1;" : ";");
         result = mySqlServer.executeUpdate(query);
-        logger.info(LoggerHelper.resultUpdate(), result);
+        logger.info(resultUpdate(), result);
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
         query = "select thread.date_of_creating as date, forum.name as forum, thread.id, isClosed, isDeleted, message, slug, title, email as user " +
@@ -66,15 +66,14 @@ public class ThreadCreateServlet extends HttpServlet {
                 "join forum on forum.id = forum_id " +
                 "where slug = '" + slug + "' and " +
                 "forum.short_name = '" + short_name + "';";
-        logger.info(LoggerHelper.query(), query);
         resultSet = mySqlServer.executeSelect(query, statement);
         try {
             createResponse(response, status, message, resultSet);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
         }
         mySqlServer.closeExecution(resultSet, statement);
-        logger.info(LoggerHelper.finish());
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {

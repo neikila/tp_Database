@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static helper.LoggerHelper.resultUpdate;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadVoteServlet extends HttpServlet {
@@ -35,32 +36,23 @@ public class ThreadVoteServlet extends HttpServlet {
 
         long threadId = 0;
         long vote = 0;
-        if (req.containsKey("thread")) {
+        if (req.containsKey("thread") && req.containsKey("vote")) {
             threadId = (long)req.get("thread");
-        } else {
-            status = 2;
-            message = "Wrong json";
-        }
-        if (req.containsKey("vote")) {
             vote = (long)req.get("vote");
-            if (vote != 1 && vote != -1) {
-                status = 3;
-                message = "Wrong vote";
-            }
-        } else {
-            status = 2;
-            message = "Wrong json";
+        }
+        if (vote != 1 && vote != -1 || threadId == 0) {
+            status = ErrorMessages.wrongData;
+            message = ErrorMessages.wrongJSONData();
         }
 
         int result = 0;
         String query;
 
-        if (status == 0) {
+        if (status == ErrorMessages.ok) {
             String likes = vote > 0 ? "likes" : "dislikes";
             query = "update thread set " + likes + " = " + likes + " + 1" + " where id = " + threadId + ";";
-            logger.info(LoggerHelper.query(), query);
             result = mySqlServer.executeUpdate(query);
-            logger.info(LoggerHelper.resultUpdate(), result);
+            logger.info(resultUpdate(), result);
         }
 
         if (result == 0) {

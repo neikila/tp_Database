@@ -14,6 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static helper.ErrorMessages.noRequestedObject;
+import static helper.ErrorMessages.noThread;
+import static helper.LoggerHelper.resultUpdate;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadUpdateServlet extends HttpServlet {
@@ -35,43 +38,31 @@ public class ThreadUpdateServlet extends HttpServlet {
         String message = "";
 
         long thread= 0;
-        if (req.containsKey("thread")) {
-            thread = (long) req.get("thread");
-        } else {
-            status = 2;
-            message = "Wrong json";
-        }
-
         String messageThread = null;
-        if (req.containsKey("message")) {
-            messageThread = (String)req.get("message");
-        } else {
-            status = 2;
-            message = "Wrong json";
-        }
-
         String slug = null;
-        if (req.containsKey("slug")) {
+
+        if (req.containsKey("thread") && req.containsKey("message") && req.containsKey("slug")) {
+            thread = (long) req.get("thread");
+            messageThread = (String)req.get("message");
             slug = (String)req.get("slug");
         } else {
-            status = 2;
-            message = "Wrong json";
+            status = ErrorMessages.wrongData;
+            message = ErrorMessages.wrongJSONData();
         }
 
         int result = 0;
 
         String query;
-        if (status == 0) {
+        if (status == ErrorMessages.ok) {
             query = "update thread set " +
                     "message = '" + messageThread + "'," +
                     "slug = '" + slug + "'" +
                     " where id = " + thread + " ;";
-            logger.info(LoggerHelper.query(), query);
             result = mySqlServer.executeUpdate(query);
-            logger.info(LoggerHelper.resultUpdate(), result);
+            logger.info(resultUpdate(), result);
             if (result != 1) {
-                status = 2;
-                message = "No such thread";
+                status = noRequestedObject;
+                message = noThread();
             }
         }
         try {

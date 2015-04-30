@@ -17,6 +17,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static helper.ErrorMessages.ok;
+import static helper.LoggerHelper.*;
+
 
 public class UserListPostsServlet extends HttpServlet {
     private Logger logger = LogManager.getLogger(UserListPostsServlet.class.getName());
@@ -29,9 +32,9 @@ public class UserListPostsServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
 
-        short status = ErrorMessages.ok;
+        short status = ok;
         String message = "";
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
@@ -40,22 +43,21 @@ public class UserListPostsServlet extends HttpServlet {
         String asc = request.getParameter("order");
         String query = "select post.id from post join (select id from users where email = '" + request.getParameter("user") + "') as u " +
                 "on u.id = post.author_id where 1 > 0 " +
-                (date != null?("and date_of_creating > '" + date + "' "):"") +
+                (date != null ? ("and date_of_creating > '" + date + "' ") : "") +
                 "order by date_of_creating " +
-                (asc == null?("desc "):asc + " ") +
-                (limit != null?("limit " + limit):"") +
+                (asc == null ? ("desc ") : asc + " ") +
+                (limit != null ? ("limit " + limit) : "") +
                 ";";
-        logger.info(LoggerHelper.query(), query);
         resultSet = mySqlServer.executeSelect(query, statement);
         try {
             createResponse(response, status, message, resultSet);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
         mySqlServer.closeExecution(resultSet, statement);
-        logger.info(LoggerHelper.finish());
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {

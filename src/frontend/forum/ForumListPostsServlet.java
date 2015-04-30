@@ -18,6 +18,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
+import static helper.ErrorMessages.wrongData;
+import static helper.ErrorMessages.wrongJSONData;
 
 
 public class ForumListPostsServlet extends HttpServlet {
@@ -42,8 +44,8 @@ public class ForumListPostsServlet extends HttpServlet {
         short status = ErrorMessages.ok;
         String message = "";
         if(forum == null) {
-            status = 3;
-            message = "Wrong data";
+            status = wrongData;
+            message = wrongJSONData();
         }
 
         String query;
@@ -51,7 +53,7 @@ public class ForumListPostsServlet extends HttpServlet {
         Statement statement = mySqlServer.getStatement();
         int forumId = mySqlServer.getForumIdByShortName(forum);
         // TODO index forum: short_name, id || post: forum_id, date_of_creating
-        if (status == 0) {
+        if (status == ErrorMessages.ok) {
             query = "select id from post " +
                     "where forum_id = '" + forumId + "' " +
                     (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
@@ -59,7 +61,6 @@ public class ForumListPostsServlet extends HttpServlet {
                     (asc == null ? ("desc ") : asc + " ") +
                     (limit != null ? ("limit " + limit) : "") +
                     ";";
-            logger.info(LoggerHelper.query(), query);
             resultSet = mySqlServer.executeSelect(query, statement);
         }
         try {
@@ -104,12 +105,12 @@ public class ForumListPostsServlet extends HttpServlet {
                             thread = true;
                             break;
                         default:
-                            status = 3;
-                            message = ErrorMessages.wrongJSONData();
+                            status = wrongData;
+                            message = wrongJSONData();
                     }
                 }
             }
-            if (status == 0) {
+            if (status == ErrorMessages.ok) {
                 while (resultSet.next()) {
                     listPosts.add(mySqlServer.getPostDetails(resultSet.getInt("id"), user, thread, forum));
                 }

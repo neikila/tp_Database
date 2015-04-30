@@ -50,13 +50,13 @@ public class MySqlConnect {
         }
     }
 
-    public ResultSet executeSelect(String query, Statement statement){
-        logger.info(LoggerHelper.query(), query);
+    public ResultSet executeSelect(String query, Statement statement) {
         ResultSet resultSet = null;
         try {
             if (statement == null) {
                 statement = connection.createStatement();
             }
+            logger.info(LoggerHelper.query(), query);
             resultSet = statement.executeQuery(query);
         } catch (SQLException ex) {
             logger.error(ex);
@@ -99,6 +99,26 @@ public class MySqlConnect {
                 e.printStackTrace();
             }
         }
+    }
+
+    public String getParentPathByParentId(long parentId) {
+        ResultSet resultSet1;
+        Statement statement1 = getStatement();
+
+        final String query = "select parent from post where id = " + parentId + ";";
+        resultSet1 = executeSelect(query, statement1);
+
+        String parent = null;
+        try {
+            if(resultSet1.next()) {
+                parent = resultSet1.getString("parent");
+            }
+        } catch (SQLException e) {
+            logger.error(e);
+            e.printStackTrace();
+        }
+        closeExecution(resultSet1, statement1);
+        return parent;
     }
 
     public String getForumNameById(int id) {
@@ -160,13 +180,12 @@ public class MySqlConnect {
     }
 
     public JSONObject getUserDetail(String email) throws IOException, SQLException {
-        String query, message = "";
-        int status = ErrorMessages.ok;
+        String query;
         ResultSet resultSet;
         Statement statement = getStatement();
 
         ResultSet followee = null, follower = null, subscription = null;
-        Statement statement_followee = getStatement(), statement_follower = getStatement(), statement_subscription = getStatement();
+        Statement statementFollowee = getStatement(), statementFollower = getStatement(), statementSubscription = getStatement();
         query = "select * from users where email = '" + email + "';";
         JSONObject data = new JSONObject();
         resultSet = executeSelect(query, statement);
@@ -176,32 +195,30 @@ public class MySqlConnect {
                 data.put("email", resultSet.getString("email"));
                 data.put("about", resultSet.getString("about").equals("")? null : resultSet.getString("about"));
                 data.put("name", resultSet.getString("name").equals("")? null : resultSet.getString("name"));
-//                logger.info("Details {}", resultSet.getString("username"));
                 data.put("username", resultSet.getString("username").equals("")? null : resultSet.getString("username") );
                 data.put("id", resultSet.getInt("id"));
+
                 query = "select email from users join follow on followee_id = id where follower_id = " + resultSet.getInt("id") + ";";
-                followee = executeSelect(query, statement_followee);
+                followee = executeSelect(query, statementFollowee);
+
                 query = "select email from users join follow on follower_id = id where followee_id = " + resultSet.getInt("id") + ";";
-                follower = executeSelect(query, statement_follower);
+                follower = executeSelect(query, statementFollower);
+
                 query = "select thread_id from users join subscribtion on user_id = id where id = " + resultSet.getInt("id") + ";";
-                subscription = executeSelect(query, statement_subscription);
-            }
-            else {
-                status = 1;
-                message = "There is no user with such email!";
-                logger.error(message);
+                subscription = executeSelect(query, statementSubscription);
+            } else {
+                data = null;
             }
         } catch (SQLException e) {
             logger.error(LoggerHelper.userDetailError());
+            logger.error(e);
+            e.printStackTrace();
         }
+        if (data != null) {
+            JSONArray toFollow = new JSONArray();
+            JSONArray iAmFollowed = new JSONArray();
+            JSONArray subscribed = new JSONArray();
 
-        JSONArray toFollow = new JSONArray();
-        JSONArray iAmFollowed = new JSONArray();
-        JSONArray subscribed = new JSONArray();
-
-        if (status != ErrorMessages.ok) {
-            data.put("error", message);
-        } else {
             while(followee.next()) {
                 toFollow.add(followee.getString("email"));
             }
@@ -214,12 +231,12 @@ public class MySqlConnect {
             data.put("following", toFollow);
             data.put("followers", iAmFollowed);
             data.put("subscriptions", subscribed);
+            logger.info(LoggerHelper.userDetailJSON(), data.toJSONString());
         }
         closeExecution(resultSet, statement);
-        closeExecution(followee, statement_followee);
-        closeExecution(follower, statement_follower);
-        closeExecution(subscription, statement_subscription);
-        logger.info(LoggerHelper.userDetailJSON(), data.toJSONString());
+        closeExecution(followee, statementFollowee);
+        closeExecution(follower, statementFollower);
+        closeExecution(subscription, statementSubscription);
         return data;
     }
 
@@ -290,7 +307,7 @@ public class MySqlConnect {
 
 
     public JSONObject getForumDetails(String short_name, String related) throws IOException, SQLException {
-        ResultSet resultSet = null;
+        ResultSet resultSet;
         Statement statement = getStatement();
 
         String query = "select forum.id, founder_id, forum.name, short_name, email from forum " +
@@ -298,8 +315,6 @@ public class MySqlConnect {
                 "where short_name = '" + short_name +"';";
         resultSet = executeSelect(query, statement);
 
-        short status = ErrorMessages.ok;
-        String message = "";
         JSONObject data = new JSONObject();
         if (resultSet.next()) {
             if (related != null) {
@@ -310,20 +325,18 @@ public class MySqlConnect {
             data.put("name", resultSet.getString("name"));
             data.put("id", resultSet.getString("id"));
             data.put("short_name", resultSet.getString("short_name"));
+            logger.info(LoggerHelper.forumDetailJSON(), data.toString());
         } else {
-            message = "There is no forum with such short_name!";
-            data.put("error", message);
-            logger.error(message);
+            data = null;
         }
         closeExecution(resultSet, statement);
-        logger.info(LoggerHelper.forumDetailJSON(), data.toString());
         return data;
     }
 
 
     public JSONObject getThreadDetailsById(int id, boolean user, boolean forum) throws IOException, SQLException {
 
-        ResultSet resultSetCount = null;
+        ResultSet resultSetCount;
         Statement statementCount = getStatement();
 
         String query = "select count(*) as amount from post where thread = " + id + " and isDeleted = 0;";
@@ -379,7 +392,7 @@ public class MySqlConnect {
 
     public JSONObject getPostDetails(int id, boolean user, boolean thread, boolean forum) throws IOException, SQLException {
 
-        ResultSet resultSet = null;
+        ResultSet resultSet;
         Statement statement = getStatement();
 
         String query = "select post.id, post.date_of_creating as date, post.likes, post.dislikes, forum.short_name as forum, short_name, isAnonymous, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread, email as user " +
@@ -389,6 +402,7 @@ public class MySqlConnect {
                 "where post.id = " + id + ";";
 
         resultSet = executeSelect(query, statement);
+
         JSONObject data = new JSONObject();
         if (resultSet.next()) {
             data.put("date", resultSet.getString("date").substring(0, 19));
@@ -424,14 +438,11 @@ public class MySqlConnect {
             } else {
                 data.put("user", resultSet.getString("user"));
             }
-
+            logger.info(LoggerHelper.postDetailJSON(), data.toString());
         } else {
-            String message = "Error in  PostDetails";
-            data.put("error", message);
-            logger.error(message);
+            data = null;
         }
         closeExecution(resultSet, statement);
-        logger.info(LoggerHelper.postDetailJSON(), data.toString());
         return data;
     }
 }

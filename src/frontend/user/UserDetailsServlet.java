@@ -36,10 +36,7 @@ public class UserDetailsServlet extends HttpServlet {
             logger.error(LoggerHelper.responseCreating());
             logger.error(e);
             e.printStackTrace();
-            logger.error(e);
-            e.printStackTrace();
         }
-
         logger.info(LoggerHelper.finish());
     }
 
@@ -50,8 +47,16 @@ public class UserDetailsServlet extends HttpServlet {
         JSONObject obj = new JSONObject();
         JSONObject data = mySqlServer.getUserDetail(email);
 
-        obj.put("response", data);
-        obj.put("code", data.containsKey("error")?1:0);
+        String message = "";
+
+        if (data == null) {
+            status = ErrorMessages.noRequestedObject;
+            message = ErrorMessages.noForum();
+        }
+
+        obj.put("response", status == ErrorMessages.ok ? data: message);
+        obj.put("code", status);
+
         logger.info(LoggerHelper.responseJSON(), obj.toString());
         response.getWriter().write(obj.toString());
     }

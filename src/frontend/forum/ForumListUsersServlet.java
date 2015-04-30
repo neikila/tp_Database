@@ -52,7 +52,6 @@ public class ForumListUsersServlet extends HttpServlet {
                 (asc == null?("desc "):asc + " ") +
                 (limit != null?("limit " + limit):"") +
                 ";";
-        logger.info(LoggerHelper.query(), query);
 
         resultSet = mySqlServer.executeSelect(query, statement);
         try {
@@ -73,21 +72,18 @@ public class ForumListUsersServlet extends HttpServlet {
         response.setHeader("Cache-Control", "no-cache");
         response.setStatus(HttpServletResponse.SC_OK);
         JSONObject obj = new JSONObject();
-        JSONObject data = new JSONObject();
 
         JSONArray listUser = new JSONArray();
 
         if (status != ErrorMessages.ok || resultSet == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            data.put("error", message);
-            obj.put("response", data);
+            obj.put("response", message);
         } else {
             while (resultSet.next()) {
                 listUser.add(mySqlServer.getUserDetail(resultSet.getInt("author_id")));
             }
             obj.put("response", listUser);
         }
-        obj.put("code", data.containsKey("error")?1:0);
+        obj.put("code", status);
         logger.info(LoggerHelper.responseJSON(), obj.toString());
         response.getWriter().write(obj.toString());
     }

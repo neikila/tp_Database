@@ -34,37 +34,25 @@ public class PostVoteServlet extends HttpServlet {
 
         long postId = 0;
         long vote = 0;
-        if (req.containsKey("post")) {
-            postId = (long)req.get("post");
-        } else {
-            status = 2;
-            message = "Wrong json";
-        }
-        if (req.containsKey("vote")) {
-            vote = (long)req.get("vote");
-            if (vote != 1 && vote != -1) {
-                status = 3;
-                message = "Wrong vote";
-            }
-        } else {
-            status = 2;
-            message = "Wrong json";
+        postId = (long)req.get("post");
+        vote = (long)req.get("vote");
+
+        if (vote != 1 && vote != -1 || postId == 0) {
+            status = ErrorMessages.wrongData;
+            message = ErrorMessages.wrongJSONData();
         }
 
-        int result = 0;
-        String query;
-
-        if (status == 0) {
+        if (status == ErrorMessages.ok) {
             String likes = vote > 0 ? "likes" : "dislikes";
-            query = "update post set " + likes + " = " + likes + " + 1" + " where id = " + postId + ";";
-            logger.info(LoggerHelper.query(), query);
-            result = mySqlServer.executeUpdate(query);
+            final String query = "update post set " + likes + " = " + likes + " + 1" + " where id = " + postId + ";";
+            int result = mySqlServer.executeUpdate(query);
             logger.info(LoggerHelper.resultUpdate(), result);
             if (result == 0) {
                 status = ErrorMessages.noRequestedObject;
                 message = ErrorMessages.noPost();
             }
         }
+
         try {
             createResponse(response, status, message, postId);
         } catch (SQLException e) {
@@ -81,13 +69,17 @@ public class PostVoteServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_OK);
 
         JSONObject obj = new JSONObject();
-        JSONObject data = new JSONObject();
-        if (status != ErrorMessages.ok) {
-            data.put("error", message);
-        } else {
-            data = mySqlServer.getPostDetails((int)postId, false, false, false);
+        JSONObject data;
+        data = mySqlServer.getPostDetails((int)postId, false, false, false);
+        if (data == null) {
+            status = ErrorMessages.noRequestedObject;
+            message = ErrorMessages.noPost();
         }
-        obj.put("response", data);
+        if (status == ErrorMessages.ok) {
+            obj.put("response", data);
+        } else {
+            obj.put("error", message);
+        }
         obj.put("code", status);
         logger.info(LoggerHelper.responseJSON(), obj.toString());
         response.getWriter().write(obj.toString());

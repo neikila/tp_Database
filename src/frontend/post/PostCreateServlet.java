@@ -57,85 +57,66 @@ public class PostCreateServlet extends HttpServlet {
             isSpam = (boolean) req.get("isSpam");
         }
 
-        long parent_id = 0;
-        try {
-            if (req.containsKey("parent")) {
-                parent_id = (long) req.get("parent");
-            }
-        } catch (Exception e) {
-            logger.info(e);
-            e.printStackTrace();
-            status = 3;
-            message = ErrorMessages.wrongJSONData();
+        long parentId = 0;
+        if (req.containsKey("parent")) {
+            parentId = (long) req.get("parent");
         }
 
         String shortName = (String)req.get("forum");
         String email = (String)req.get("user");
         String messagePost = (String)req.get("message");
-        int thread =  (int)(long)req.get("thread");
+        long thread =  (long)req.get("thread");
         String date = (String)req.get("date");
         int result;
 
         String query;
         String matPath = "";
-        if (parent_id != 0) {
-            ResultSet resultSet1 = null;
-            Statement statement1 = mySqlServer.getStatement();
-            query = "select parent from post where id = " + parent_id + ";";
-            logger.info(LoggerHelper.query(), query);
-            resultSet1 = mySqlServer.executeSelect(query, statement1);
-
-            try {
-                if(resultSet1.next()) {
-                    String parent = resultSet1.getString("parent");
-                    if (parent.equals("")) {
-                        matPath = String.format("%03d", parent_id);
-                    } else {
-                        matPath = parent + String.format("_%03d", parent_id);
-                    }
-                    logger.info(matPath);
+        if (parentId != 0) {
+            String parent = mySqlServer.getParentPathByParentId(parentId);
+            if (parent == null) {
+                status = ErrorMessages.noRequestedObject;
+                message = ErrorMessages.noParent();
+            } else {
+                if (parent.equals("")) {
+                    matPath = String.format("%03d", parentId);
                 } else {
-                    status = ErrorMessages.noRequestedObject;
-                    message = ErrorMessages.noParent();
-                    logger.info(message);
+                    matPath = parent + String.format("_%03d", parentId);
                 }
-            } catch (SQLException e) {
-                logger.error(e);
-                e.printStackTrace();
             }
-            mySqlServer.closeExecution(resultSet1, statement1);
         }
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
-        if (status == 0) {
+        if (status == ErrorMessages.ok) {
             int authorId = mySqlServer.getUserIdByEmail(email);
             int forumId = mySqlServer.getForumIdByShortName(shortName);
-            // TODO Проверка налчичия такого форума
-            if (forumId > 0 && authorId > 0) {
-                String forumName = mySqlServer.getForumNameById(forumId);
-                query =
-                        "insert into post set " +
-                                "thread = " + thread + ", " +
-                                "message = '" + messagePost + "', " +
-                                "author_id = " + authorId + ", " +
-                                "date_of_creating = '" + date + "', " +
-                                "forum_id = " + forumId + ", " +
-                                "parent = '" + matPath + "', " +
-                                "isApproved = " + (isApproved ? 1 : 0) + ", " +
-                                "isHighlighted = " + (isHighlighted ? 1 : 0) + ", " +
-                                "isEdited = " + (isEdited ? 1 : 0) + ", " +
-                                "isSpam = " + (isSpam ? 1 : 0) + ", " +
-                                "isDeleted = " + (isDeleted ? 1 : 0) + ";";
-                logger.info(LoggerHelper.query(), query);
-                result = mySqlServer.executeUpdate(query);
-                logger.info(LoggerHelper.resultUpdate(), result);
+            if (forumId > 0) {
+                if (authorId > 0) {
+                    String forumName = mySqlServer.getForumNameById(forumId);
+                    query = "insert into post set " +
+                                    "thread = " + thread + ", " +
+                                    "message = '" + messagePost + "', " +
+                                    "author_id = " + authorId + ", " +
+                                    "date_of_creating = '" + date + "', " +
+                                    "forum_id = " + forumId + ", " +
+                                    "parent = '" + matPath + "', " +
+                                    "isApproved = " + (isApproved ? 1 : 0) + ", " +
+                                    "isHighlighted = " + (isHighlighted ? 1 : 0) + ", " +
+                                    "isEdited = " + (isEdited ? 1 : 0) + ", " +
+                                    "isSpam = " + (isSpam ? 1 : 0) + ", " +
+                                    "isDeleted = " + (isDeleted ? 1 : 0) + ";";
+                    result = mySqlServer.executeUpdate(query);
+                    logger.info(LoggerHelper.resultUpdate(), result);
 
-                query = "select post.id, post.date_of_creating as date, '" + forumName + "' as forum, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread, '" + email + "' as user " +
-                        "from post " +
-                        "where author_id = " + authorId + " and " +
-                        "post.date_of_creating = '" + date + "';";
-                logger.info(LoggerHelper.query(), query);
-                resultSet = mySqlServer.executeSelect(query, statement);
+                    query = "select post.id, post.date_of_creating as date, '" + forumName + "' as forum, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread, '" + email + "' as user " +
+                            "from post " +
+                            "where author_id = " + authorId + " and " +
+                            "post.date_of_creating = '" + date + "';";
+                    resultSet = mySqlServer.executeSelect(query, statement);
+                } else {
+                    status = ErrorMessages.noRequestedObject;
+                    message = ErrorMessages.noUser();
+                    logger.info(LoggerHelper.noUserOrForum());
+                }
             } else {
                 status = ErrorMessages.noRequestedObject;
                 message = ErrorMessages.noForum();

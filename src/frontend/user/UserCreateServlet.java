@@ -17,6 +17,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static helper.ErrorMessages.*;
+import static helper.LoggerHelper.resultUpdate;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class UserCreateServlet extends HttpServlet {
@@ -33,6 +35,7 @@ public class UserCreateServlet extends HttpServlet {
         logger.info(LoggerHelper.start());
         JSONObject req = getJSONFromRequest(request, "UserCreateServlet");
         boolean isAnonymous = false;
+
         if (req.containsKey("isAnonymous")) {
             isAnonymous = (boolean) req.get("isAnonymous");
         }
@@ -41,14 +44,13 @@ public class UserCreateServlet extends HttpServlet {
         String message = "";
 
         if (!Validator.userValidation(req)) {
-            status = 3;
-            message = ErrorMessages.wrongJSONData();
-            logger.info(message);
+            status = wrongData;
+            message = wrongJSONData();
         }
 
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
-        if (status == 0) {
+        if (status == ErrorMessages.ok) {
             int result;
             String query = "insert into users set email='" + req.get("email") + "', " +
                     "username='" + req.get("username") + "', " +
@@ -56,17 +58,14 @@ public class UserCreateServlet extends HttpServlet {
                     "isAnonymous=" + (isAnonymous ? "1" : "0") + ", " +
                     "about='" + req.get("about") +
                     "';\n";
-            logger.info(LoggerHelper.query(), query);
             result = mySqlServer.executeUpdate(query);
-            logger.info(LoggerHelper.resultUpdate(), result);
+            logger.info(resultUpdate(), result);
 
             query = "select * from users where email = '" + req.get("email") + "';";
-            logger.info(LoggerHelper.query(), query);
             resultSet = mySqlServer.executeSelect(query, statement);
             if (result != 1) {
-                status = 5;
-                message = ErrorMessages.userAlreadyExist();
-                logger.info(message);
+                status = suchUserAlreadyExist;
+                message = userAlreadyExist();
             }
         }
         try {
@@ -86,7 +85,7 @@ public class UserCreateServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_OK);
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != ErrorMessages.ok && status != 5) {
+        if (status != ErrorMessages.ok && status != ErrorMessages.suchUserAlreadyExist) {
             data.put("error", message);
         } else {
             resultSet.next();

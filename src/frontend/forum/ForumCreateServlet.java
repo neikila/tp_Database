@@ -16,6 +16,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static helper.ErrorMessages.forumCreateError;
+import static helper.ErrorMessages.unknownError;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ForumCreateServlet extends HttpServlet {
@@ -44,10 +46,8 @@ public class ForumCreateServlet extends HttpServlet {
             result = mySqlServer.executeUpdate(query);
         } catch (Exception e) {
             logger.error(e);
-            result = 0;
-            status = ErrorMessages.unknownError;
-            message = ErrorMessages.forumCreateError();
-            logger.info(message);
+            status = unknownError;
+            message = forumCreateError();
         }
         logger.info(LoggerHelper.resultUpdate(), result);
         ResultSet resultSet = null;

@@ -17,6 +17,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static helper.ErrorMessages.ok;
+import static helper.LoggerHelper.*;
+
 public class UserListFollowerServlet extends HttpServlet {
     private Logger logger = LogManager.getLogger(UserListFollowerServlet.class.getName());
 
@@ -28,13 +31,13 @@ public class UserListFollowerServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
         String email = request.getParameter("user");
         String asc = request.getParameter("order");
         String since_id = request.getParameter("since");
         String limit = request.getParameter("limit");
 
-        short status = ErrorMessages.ok;
+        short status = ok;
         String message = "";
 
         String query;
@@ -43,23 +46,22 @@ public class UserListFollowerServlet extends HttpServlet {
 
         query = "select id from users join follow on id = follower_id where followee_id = " +
                 "(select id from users where email = '" + email + "') " +
-                (since_id != null?("and id > '" + since_id + "' "):"") +
+                (since_id != null ? ("and id > '" + since_id + "' ") : "") +
                 "order by name " +
-                (asc == null?("desc "):asc + " ") +
-                (limit != null?("limit " + limit):"") +
+                (asc == null ? ("desc ") : asc + " ") +
+                (limit != null ? ("limit " + limit) : "") +
                 ";";
-        logger.info(LoggerHelper.query(), query);
         resultSet = mySqlServer.executeSelect(query, statement);
 
         try {
             createResponse(response, status, message, resultSet);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
         mySqlServer.closeExecution(resultSet, statement);
-        logger.info(LoggerHelper.finish());
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {

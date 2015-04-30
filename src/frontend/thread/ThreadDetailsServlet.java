@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
 
+import static helper.ErrorMessages.wrongData;
+import static helper.ErrorMessages.wrongJSONData;
+
 public class ThreadDetailsServlet extends HttpServlet {
     private Logger logger = LogManager.getLogger(ThreadDetailsServlet.class.getName());
     private MySqlConnect mySqlServer;
@@ -49,6 +52,7 @@ public class ThreadDetailsServlet extends HttpServlet {
         response.setHeader("Cache-Control", "no-cache");
         response.setStatus(HttpServletResponse.SC_OK);
         JSONObject obj = new JSONObject();
+        String message = "";
         boolean user = false;
         boolean forum = false;
         if (related != null) {
@@ -61,17 +65,20 @@ public class ThreadDetailsServlet extends HttpServlet {
                         forum = true;
                         break;
                     default:
-                        status = 3;
+                        status = wrongData;
+                        message = wrongJSONData();
                 }
             }
         }
         JSONObject data;
-        if (status == 0) {
+
+        if (status == ErrorMessages.ok) {
            data = mySqlServer.getThreadDetailsById(Integer.parseInt(thread), user, forum);
         } else {
             data = new JSONObject();
-            data.put("error", "Wrong related arg");
+            data.put("error", message);
         }
+
         obj.put("response", data);
         obj.put("code", status);
         logger.info(LoggerHelper.responseJSON(), obj.toString());

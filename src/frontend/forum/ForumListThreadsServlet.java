@@ -18,6 +18,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
+import static helper.ErrorMessages.wrongData;
+import static helper.ErrorMessages.wrongJSONData;
+
 public class ForumListThreadsServlet extends HttpServlet {
     private Logger logger = LogManager.getLogger(ForumListThreadsServlet.class.getName());
 
@@ -54,7 +57,6 @@ public class ForumListThreadsServlet extends HttpServlet {
                 (asc == null?("desc "):asc + " ") +
                 (limit != null?("limit " + limit):"") +
                 ";";
-        logger.info(LoggerHelper.query(), query);
 
         resultSet = mySqlServer.executeSelect(query, statement);
         try {
@@ -95,13 +97,13 @@ public class ForumListThreadsServlet extends HttpServlet {
                                 forum = true;
                                 break;
                             default:
-                                status = 3;
-                                message = ErrorMessages.wrongJSONData();
+                                status = wrongData;
+                                message = wrongJSONData();
                         }
                     }
                 }
             }
-            if (status == 0) {
+            if (status == ErrorMessages.ok) {
                 while (resultSet.next()) {
                     listThreads.add(mySqlServer.getThreadDetailsById(resultSet.getInt("id"), user, forum));
                 }

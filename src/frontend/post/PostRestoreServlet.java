@@ -37,20 +37,20 @@ public class PostRestoreServlet extends HttpServlet {
         if (req.containsKey("post")) {
             postId = (long)req.get("post");
         } else {
-            // TODO некорректный запрос
+            status = ErrorMessages.wrongData;
+            message = ErrorMessages.wrongJSONData();
         }
 
         int result = 0;
         String query;
 
-        if (status == 0) {
+        if (status == ErrorMessages.ok) {
             query = "update post set isDeleted = 0 where id = " + postId + ";";
-            logger.info(LoggerHelper.query(), query);
             result = mySqlServer.executeUpdate(query);
             logger.info(LoggerHelper.resultUpdate(), result);
         }
         if (result == 0) {
-            status = ErrorMessages.noRequestedObject; //TODO check status/ No such post
+            status = ErrorMessages.noRequestedObject;
             message = ErrorMessages.noPost();
         }
         try {
@@ -70,13 +70,13 @@ public class PostRestoreServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != ErrorMessages.ok) {
-            data.put("error", message);
-        } else {
+
+        if (status == ErrorMessages.ok) {
             data.put("post", postId);
         }
-        obj.put("response", data);
+        obj.put("response", status == ErrorMessages.ok? data: message);
         obj.put("code", status);
+
         logger.info(LoggerHelper.responseJSON(), obj.toString());
         response.getWriter().write(obj.toString());
     }

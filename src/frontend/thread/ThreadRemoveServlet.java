@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static helper.LoggerHelper.resultUpdate;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadRemoveServlet extends HttpServlet {
@@ -34,31 +35,26 @@ public class ThreadRemoveServlet extends HttpServlet {
         short status = ErrorMessages.ok;
         String message = "";
 
-        long threadId= 0;
-        if (req.containsKey("thread")) {
-            threadId = (long)req.get("thread");
-        } else {
-            status = 2;
-            message = "Wrong json";
+        long threadId= (long)req.get("thread");
+        if (threadId == 0) {
+            status = ErrorMessages.wrongData;
+            message = ErrorMessages.wrongJSONData();
         }
 
         int result = 0;
-        String query;
 
-        if (status == 0) {
-            query = "update thread set isDeleted = 1 where id = " + threadId + ";";
-            logger.info(LoggerHelper.query(), query);
+        if (status == ErrorMessages.ok) {
+            String query = "update thread set isDeleted = 1 where id = " + threadId + ";";
             result = mySqlServer.executeUpdate(query);
-            logger.info(LoggerHelper.resultUpdate(), result);
+            logger.info(resultUpdate(), result);
 
-            if (result == 0) {
+            if (result != 0) {
+                query = "update post set isDeleted = 1 where thread = " + threadId + ";";
+                result = mySqlServer.executeUpdate(query);
+                logger.info(resultUpdate(), result);
+            } else {
                 status = ErrorMessages.noRequestedObject;
                 message = ErrorMessages.noPost();
-            } else {
-                query = "update post set isDeleted = 1 where thread = " + threadId + ";";
-                logger.info(LoggerHelper.query(), query);
-                result = mySqlServer.executeUpdate(query);
-                logger.info(LoggerHelper.resultUpdate(), result);
             }
         }
         try {
@@ -78,12 +74,10 @@ public class ThreadRemoveServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != ErrorMessages.ok) {
-            data.put("error", message);
-        } else {
+        if (status == ErrorMessages.ok) {
             data.put("thread", threadId);
         }
-        obj.put("response", data);
+        obj.put("response", status == ErrorMessages.ok? data: message);
         obj.put("code", status);
         logger.info(LoggerHelper.responseJSON(), obj.toString());
         response.getWriter().write(obj.toString());

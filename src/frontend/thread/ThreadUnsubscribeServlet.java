@@ -14,6 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static helper.ErrorMessages.noRequestedObject;
+import static helper.ErrorMessages.noThread;
+import static helper.LoggerHelper.resultUpdate;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadUnsubscribeServlet extends HttpServlet {
@@ -62,11 +65,10 @@ public class ThreadUnsubscribeServlet extends HttpServlet {
         if (status == ErrorMessages.ok) {
             query = "delete subscribtion from subscribtion where thread_id = " + threadId + " and user_id = " + userId + ";";
             result = mySqlServer.executeUpdate(query);
-            logger.info(LoggerHelper.query(), query);
-            logger.info(LoggerHelper.resultUpdate(), result);
+            logger.info(resultUpdate(), result);
             if (result == 0) {
-                status = ErrorMessages.noRequestedObject;
-                message = ErrorMessages.noThread();
+                status = noRequestedObject;
+                message = noThread();
             }
         }
 

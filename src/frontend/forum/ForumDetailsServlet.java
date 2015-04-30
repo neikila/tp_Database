@@ -14,6 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static helper.ErrorMessages.noForum;
+import static helper.ErrorMessages.noRequestedObject;
+
 public class ForumDetailsServlet extends HttpServlet {
     private Logger logger = LogManager.getLogger(ForumDetailsServlet.class.getName());
     private MySqlConnect mySqlServer;
@@ -34,7 +37,7 @@ public class ForumDetailsServlet extends HttpServlet {
 
         if (related != null && !related.equals("user")) {
             status = ErrorMessages.wrongData;
-            message = "Wrong argument related";
+            message = ErrorMessages.wrongJSONData();
         }
 
         try {
@@ -53,16 +56,17 @@ public class ForumDetailsServlet extends HttpServlet {
         response.setHeader("Cache-Control", "no-cache");
         response.setStatus(HttpServletResponse.SC_OK);
         JSONObject obj = new JSONObject();
-        JSONObject data = new JSONObject();
+        JSONObject data;
 
-        if (status == 0) {
-            data = mySqlServer.getForumDetails(short_name, related);
-        } else {
-            data.put("error", message);
+        data = mySqlServer.getForumDetails(short_name, related);
+        if (data == null) {
+            status = noRequestedObject;
+            message = noForum();
         }
 
-        obj.put("response", data);
-        obj.put("code", data.containsKey("error")?1:0);
+        obj.put("response", status == ErrorMessages.ok ? data: message);
+        obj.put("code", status);
+
         logger.info(LoggerHelper.responseJSON(), obj.toString());
         response.getWriter().write(obj.toString());
     }

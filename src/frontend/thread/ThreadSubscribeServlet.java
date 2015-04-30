@@ -14,6 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static helper.ErrorMessages.noRequestedObject;
+import static helper.ErrorMessages.noThread;
+import static helper.LoggerHelper.resultUpdate;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadSubscribeServlet extends HttpServlet {
@@ -39,7 +42,6 @@ public class ThreadSubscribeServlet extends HttpServlet {
         } else {
             status = 2;
             message = "Wrong json";
-            logger.info(message);
         }
 
         String email = null;
@@ -48,7 +50,6 @@ public class ThreadSubscribeServlet extends HttpServlet {
         } else {
             status = 2;
             message = "Wrong json";
-            logger.info(message);
         }
 
         int result = 0;
@@ -63,11 +64,10 @@ public class ThreadSubscribeServlet extends HttpServlet {
         if (status == ErrorMessages.ok) {
             query = "insert into subscribtion set user_id = " + userId + " , thread_id = " + threadId + ";";
             result = mySqlServer.executeUpdate(query);
-            logger.info(LoggerHelper.query(), query);
-            logger.info(LoggerHelper.resultUpdate(), result);
+            logger.info(resultUpdate(), result);
             if (result == 0) {
-                status = ErrorMessages.noRequestedObject;
-                message = ErrorMessages.noThread();
+                status = noRequestedObject;
+                message = noThread();
             }
         }
         try {

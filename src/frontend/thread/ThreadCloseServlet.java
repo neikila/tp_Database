@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static helper.ErrorMessages.*;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadCloseServlet extends HttpServlet {
@@ -37,22 +38,20 @@ public class ThreadCloseServlet extends HttpServlet {
         if (req.containsKey("thread")) {
             threadId = (long)req.get("thread");
         } else {
-            status = ErrorMessages.notValidRequest;
-            message = ErrorMessages.wrongJSONData();
-            logger.info(message);
+            status = notValidRequest;
+            message = wrongJSONData();
         }
 
         int result = 0;
         String query;
 
-        if (status == 0) {
+        if (status == ErrorMessages.ok) {
             query = "update thread set isClosed = 1 where id = " + threadId + ";";
             result = mySqlServer.executeUpdate(query);
             logger.info(LoggerHelper.resultUpdate(), result);
             if (result == 0) {
-                status = ErrorMessages.noRequestedObject;
-                message = ErrorMessages.noPost();
-                logger.info(message);
+                status = noRequestedObject;
+                message = noPost();
             }
         }
         try {

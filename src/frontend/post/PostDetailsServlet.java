@@ -27,15 +27,11 @@ public class PostDetailsServlet extends HttpServlet {
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(LoggerHelper.start());
-        short status = ErrorMessages.ok;
         Map<String, String[]> paramMap = request.getParameterMap();
         int id = Integer.parseInt(paramMap.containsKey("post") ? paramMap.get("post")[0] : "0");
-        if (id == 0) {
-            status = 3;
-        }
         String[] related = paramMap.get("related");
         try {
-            createResponse(response, status, id, related);
+            createResponse(response, id, related);
         } catch (SQLException e) {
             e.printStackTrace();
             logger.error(LoggerHelper.responseCreating());
@@ -46,14 +42,23 @@ public class PostDetailsServlet extends HttpServlet {
         logger.info(LoggerHelper.finish());
     }
 
-    private void createResponse(HttpServletResponse response, short status, int id, String[] related) throws IOException, SQLException {
+    private void createResponse(HttpServletResponse response, int id, String[] related) throws IOException, SQLException {
         response.setContentType("json;charset=UTF-8");
         response.setHeader("Cache-Control", "no-cache");
         response.setStatus(HttpServletResponse.SC_OK);
+
         JSONObject obj = new JSONObject();
         boolean user = false;
         boolean forum = false;
         boolean thread = false;
+        String message = "";
+        short status = ErrorMessages.ok;
+
+        if (id == 0) {
+            status = ErrorMessages.wrongData;
+            message = ErrorMessages.wrongJSONData();
+        }
+
         if (related != null) {
             for (String aRelated : related) {
                 switch (aRelated) {
@@ -67,19 +72,19 @@ public class PostDetailsServlet extends HttpServlet {
                         thread = true;
                         break;
                     default:
-                        status = 3;
+                        status = ErrorMessages.wrongData;
+                        message = ErrorMessages.wrongJSONData();
                 }
             }
         }
         JSONObject data;
-        if (status == 0) {
-            data = mySqlServer.getPostDetails(id, user, thread, forum);
-            obj.put("code", (data.containsKey("error")?1:0)==1?1:status);
-            obj.put("response", data);
-        } else {
-            obj.put("code", status);
-            obj.put("error", "Wrong data");
+        data = mySqlServer.getPostDetails(id, user, thread, forum);
+        if (data == null) {
+            status = ErrorMessages.noRequestedObject;
+            message = ErrorMessages.noPost();
         }
+        obj.put("response", status == ErrorMessages.ok ? data: message);
+        obj.put("code", status);
         logger.info(LoggerHelper.responseJSON(), obj.toString());
         response.getWriter().write(obj.toString());
     }

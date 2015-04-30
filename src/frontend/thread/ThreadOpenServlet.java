@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static helper.LoggerHelper.resultUpdate;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadOpenServlet extends HttpServlet {
@@ -38,18 +39,17 @@ public class ThreadOpenServlet extends HttpServlet {
         if (req.containsKey("thread")) {
             threadId = (long)req.get("thread");
         } else {
-            status = 2;
-            message = "Wrong json";
+            status = ErrorMessages.wrongData;
+            message = ErrorMessages.wrongJSONData();
         }
 
         int result = 0;
         String query;
 
-        if (status == 0) {
+        if (status == ErrorMessages.ok) {
             query = "update thread set isClosed = 0 where id = " + threadId + ";";
-            logger.info(LoggerHelper.query(), query);
             result = mySqlServer.executeUpdate(query);
-            logger.info(LoggerHelper.resultUpdate(), result);
+            logger.info(resultUpdate(), result);
         }
         if (result == 0) {
             status = ErrorMessages.noRequestedObject;

@@ -17,6 +17,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static helper.ErrorMessages.ok;
+import static helper.LoggerHelper.*;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class UserUnfollowServlet extends HttpServlet {
@@ -30,7 +32,7 @@ public class UserUnfollowServlet extends HttpServlet {
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
 
         JSONObject req = getJSONFromRequest(request, "UserFollow");
 
@@ -39,34 +41,28 @@ public class UserUnfollowServlet extends HttpServlet {
         String query = "delete from follow where " +
                 "followee_id = (select id from users where email = '" + req.get("followee") + "') and " +
                 "follower_id = (select id from users where email = '" + email + "');";
-        logger.info(LoggerHelper.query(), query);
         int result = mySqlServer.executeUpdate(query);
-        logger.info(LoggerHelper.resultUpdate(), result);
-        short status = ErrorMessages.ok;
+        logger.info(resultUpdate(), result);
+        short status = ok;
         String message = "";
 
         ResultSet resultSet;
         Statement statement = mySqlServer.getStatement();
 
         query = "select * from users where email = '" + email + "';";
-        logger.info(LoggerHelper.query(), query);
         resultSet = mySqlServer.executeSelect(query, statement);
 
         ResultSet followee = null, follower = null, subscription = null;
         Statement statement_followee = mySqlServer.getStatement(), statement_follower = mySqlServer.getStatement(), statement_subscription = mySqlServer.getStatement();
         try {
-            if(resultSet.next()) {
+            if (resultSet.next()) {
                 query = "select email from users join follow on followee_id = id where follower_id = " + resultSet.getInt("id") + ";";
-                logger.info(LoggerHelper.query(), query);
                 followee = mySqlServer.executeSelect(query, statement_followee);
                 query = "select email from users join follow on follower_id = id where followee_id = " + resultSet.getInt("id") + ";";
-                logger.info(LoggerHelper.query(), query);
                 follower = mySqlServer.executeSelect(query, statement_follower);
                 query = "select thread_id from users join subscribtion on user_id = id where id = " + resultSet.getInt("id") + ";";
-                logger.info(LoggerHelper.query(), query);
                 subscription = mySqlServer.executeSelect(query, statement_subscription);
-            }
-            else {
+            } else {
                 resultSet = null;
                 status = 1;
                 message = "There is no user with such email!";
@@ -77,7 +73,7 @@ public class UserUnfollowServlet extends HttpServlet {
         try {
             createResponse(response, status, message, resultSet, followee, follower, subscription);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
@@ -85,7 +81,7 @@ public class UserUnfollowServlet extends HttpServlet {
         mySqlServer.closeExecution(followee, statement_followee);
         mySqlServer.closeExecution(follower, statement_follower);
         mySqlServer.closeExecution(subscription, statement_subscription);
-        logger.info(LoggerHelper.finish());
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet, ResultSet followee, ResultSet follower, ResultSet subscription) throws IOException, SQLException {

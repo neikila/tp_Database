@@ -17,6 +17,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static java.lang.Integer.parseInt;
+import static java.lang.String.format;
+
 public class ThreadListPostsServlet extends HttpServlet {
     private Logger logger = LogManager.getLogger(ThreadListPostsServlet.class.getName());
 
@@ -40,73 +43,63 @@ public class ThreadListPostsServlet extends HttpServlet {
         String sort = request.getParameter("sort");
 
         //TODO change to enum
-        int sortType = 0;
+        int sortType = -1;
         if (sort == null) {
             sort = "flat";
         }
+
         switch (sort) {
             case "flat": sortType = 0; break;
             case "tree": sortType = 1; break;
             case "parent_tree": sortType = 2; break;
-            default:
-                status = 3;
-                message = "Wrong data";
         }
-        if(thread_str == null) {
-            status = 3;
-            message = "Wrong data";
-        } else {
-            try {
-                if (Integer.parseInt(thread_str) == 0) {
-                    status = 3;
-                    message = "Wrong data";
-                }
-            } catch (Exception e) {
-                status = 3;
-                message = "Wrong data";
-            }
+
+        if(thread_str == null || Integer.parseInt(thread_str) == 0 || sortType == -1) {
+            status = ErrorMessages.wrongData;
+            message = ErrorMessages.wrongJSONData();
         }
 
         String query = null, subQuery = null;
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
-        if (status == 0) {
+        if (status == ErrorMessages.ok) {
             switch (sortType) {
-                case 0: query = "select id from post " +
-                        "where thread = " + Integer.parseInt(thread_str) + " " +
-                        (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
-                        "order by date_of_creating " +
-                        (asc == null ? ("desc ") : asc + " ") +
-                        (limit != null ? ("limit " + limit) : "") +
-                        ";";
+                case 0:
+                    query = "select id from post " +
+                            "where thread = " + parseInt(thread_str) + " " +
+                            (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
+                            "order by date_of_creating " +
+                            (asc == null ? ("desc ") : asc + " ") +
+                            (limit != null ? ("limit " + limit) : "") +
+                            ";";
                     break;
-                case 1: query = "select id from post " +
-                        "where thread = " + Integer.parseInt(thread_str) + " " +
-                        (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
-                        "order by parent, date_of_creating " +
-                        (asc == null ? ("desc ") : asc + " ") +
-                        (limit != null ? ("limit " + limit) : "") +
-                        ";";
+                case 1:
+                    query = "select id from post " +
+                            "where thread = " + parseInt(thread_str) + " " +
+                            (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
+                            "order by parent, date_of_creating " +
+                            (asc == null ? ("desc ") : asc + " ") +
+                            (limit != null ? ("limit " + limit) : "") +
+                            ";";
                     break;
             }
             if (query == null) {
-                subQuery = "select id from post where thread = " + Integer.parseInt(thread_str) + " and parent = '' order by date_of_creating limit " + limit +";";
+                subQuery = "select id from post where thread = " + parseInt(thread_str) + " and parent = '' order by date_of_creating limit " + limit + ";";
                 Statement statementSub = mySqlServer.getStatement();
                 ResultSet resultSetSub = mySqlServer.executeSelect(subQuery, statementSub);
                 StringBuilder parents = new StringBuilder();
                 parents.append("('000'");
                 try {
-                    while( resultSetSub.next()) {
-                        parents.append(" '" + String.format("%03d", resultSetSub.getInt("id") ) + "'");
+                    while (resultSetSub.next()) {
+                        parents.append(" '" + format("%03d", resultSetSub.getInt("id")) + "'");
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
                 parents.append(')');
                 mySqlServer.closeExecution(resultSetSub, statementSub);
-                query = "select id from post where thread = " + Integer.parseInt(thread_str) + " and LEFT(parent, 3) in " + parents + ";";
+                query = "select id from post where thread = " + parseInt(thread_str) + " and LEFT(parent, 3) in " + parents + ";";
             }
-            logger.info(LoggerHelper.query(), query);
             resultSet = mySqlServer.executeSelect(query, statement);
         }
         try {
