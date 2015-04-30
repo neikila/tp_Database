@@ -6,6 +6,14 @@ import javax.servlet.http.HttpServletResponse;
  * Created by neikila on 30.04.15.
  */
 public class CommonHelper {
+    public static void appendSinceId(StringBuilder query, String sinceId) {
+        if (sinceId != null) {
+            query
+                    .append("and id > '")
+                    .append(sinceId)
+                    .append("' ");
+        }
+    }
     public static void appendDateAndAscAndLimit(StringBuilder query, String since, String asc, String limit) {
         if (since != null) {
             query

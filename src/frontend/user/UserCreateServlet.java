@@ -1,5 +1,6 @@
 package frontend.user;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import helper.Validator;
@@ -52,20 +53,22 @@ public class UserCreateServlet extends HttpServlet {
         Statement statement = mySqlServer.getStatement();
         if (status == ErrorMessages.ok) {
             int result;
-            String query = "insert into users set email='" + req.get("email") + "', " +
-                    "username='" + req.get("username") + "', " +
-                    "name='" + req.get("name") + "', " +
-                    "isAnonymous=" + (isAnonymous ? "1" : "0") + ", " +
-                    "about='" + req.get("about") +
-                    "';\n";
-            result = mySqlServer.executeUpdate(query);
+            StringBuilder query = new StringBuilder();
+            query.append("insert into users set email='")
+                    .append(req.get("email")).append("', ")
+                    .append("username='").append(req.get("username")).append("', ")
+                    .append("name='").append(req.get("name")).append("', ")
+                    .append("isAnonymous=").append(isAnonymous ? "1" : "0").append(", ")
+                    .append("about='").append(req.get("about"))
+                    .append("';");
+            result = mySqlServer.executeUpdate(query.toString());
             logger.info(resultUpdate(), result);
-
-            query = "select * from users where email = '" + req.get("email") + "';";
-            resultSet = mySqlServer.executeSelect(query, statement);
             if (result != 1) {
                 status = suchUserAlreadyExist;
                 message = userAlreadyExist();
+            } else {
+                String queryStr = "select * from users where email = '" + req.get("email") + "';";
+                resultSet = mySqlServer.executeSelect(queryStr, statement);
             }
         }
         try {
@@ -80,14 +83,10 @@ public class UserCreateServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != ErrorMessages.ok && status != ErrorMessages.suchUserAlreadyExist) {
-            data.put("error", message);
-        } else {
+        if (status == ErrorMessages.ok) {
             resultSet.next();
             data.put("isAnonymous", resultSet.getBoolean("isAnonymous"));
             data.put("email", resultSet.getString("email"));
@@ -95,6 +94,8 @@ public class UserCreateServlet extends HttpServlet {
             data.put("name", resultSet.getString("name"));
             data.put("username", resultSet.getString("username"));
             data.put("id", resultSet.getInt("id"));
+        } else {
+            data.put("error", message);
         }
         obj.put("response", data);
         obj.put("code", status);

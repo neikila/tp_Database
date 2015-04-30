@@ -67,11 +67,13 @@ public class PostVoteServlet extends HttpServlet {
     private void createResponse(HttpServletResponse response, short status, String message, long postId) throws IOException, SQLException {
         CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
-        JSONObject data;
-        data = mySqlServer.getPostDetails((int)postId, false, false, false);
-        if (data == null) {
-            status = ErrorMessages.noRequestedObject;
-            message = ErrorMessages.noPost();
+        JSONObject data = null;
+        if (status == ErrorMessages.ok) {
+            data = mySqlServer.getPostDetails((int) postId, false, false, false);
+            if (data == null) {
+                status = ErrorMessages.noRequestedObject;
+                message = ErrorMessages.noPost();
+            }
         }
         if (status == ErrorMessages.ok) {
             obj.put("response", data);

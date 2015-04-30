@@ -1,5 +1,6 @@
 package frontend.user;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -48,10 +49,7 @@ public class UserListServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-
+        CommonHelper.setResponse(response);
         JSONArray userList = new JSONArray();
         JSONObject user;
 

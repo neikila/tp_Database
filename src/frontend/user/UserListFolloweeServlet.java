@@ -1,5 +1,6 @@
 package frontend.user;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -40,20 +41,18 @@ public class UserListFolloweeServlet extends HttpServlet {
         short status = ok;
         String message = "";
 
-        String query;
+        StringBuilder query = new StringBuilder();
         ResultSet resultSet;
         Statement statement = mySqlServer.getStatement();
 
         int userId = mySqlServer.getUserIdByEmail(email);
 
-        // TODO загнать в follow
-        query = "select id from users join follow on id = followee_id where follower_id = " + userId + " " +
-                (since_id != null ? ("and id > '" + since_id + "' ") : "") +
-                "order by name " +
-                (asc == null ? ("desc ") : asc + " ") +
-                (limit != null ? ("limit " + limit) : "") +
-                ";";
-        resultSet = mySqlServer.executeSelect(query, statement);
+        query
+                .append("select id from users join follow on id = followee_id where follower_id = ").append(userId).append(" ");
+        CommonHelper.appendSinceId(query, since_id);
+        query.append("order by name ");
+        CommonHelper.appendLimitAndAsc(query, limit, asc);
+        resultSet = mySqlServer.executeSelect(query.toString(), statement);
 
         try {
             createResponse(response, status, message, resultSet);
@@ -67,28 +66,17 @@ public class UserListFolloweeServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
-        JSONObject data = new JSONObject();
         JSONArray iFollow = new JSONArray();
 
         if (status != ErrorMessages.ok || resultSet == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            data.put("error", message);
-            obj.put("response", data);
+            obj.put("response", message);
         } else {
             while (resultSet.next()) {
                 iFollow.add(mySqlServer.getUserDetail(resultSet.getInt("id")));
             }
-            if (iFollow.size() > 0) {
-                obj.put("response", iFollow);
-            } else {
-                status = ErrorMessages.noRequestedObject;
-                data.put("error", ErrorMessages.noUser());
-                obj.put("response", data);
-            }
+            obj.put("response", iFollow);
         }
         obj.put("code", status);
         logger.info(LoggerHelper.responseJSON(), obj.toString());

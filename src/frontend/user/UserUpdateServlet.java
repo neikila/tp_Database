@@ -1,11 +1,11 @@
 package frontend.user;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import javax.servlet.ServletException;
@@ -13,11 +13,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
-import static helper.ErrorMessages.*;
+import static helper.ErrorMessages.ok;
 import static helper.LoggerHelper.*;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
@@ -39,89 +37,38 @@ public class UserUpdateServlet extends HttpServlet {
         short status = ok;
         String message = "";
         int result;
+        String email = (String) req.get("user");
         String query = "update users set about = '" + req.get("about") + "', " +
                 "name = '" + req.get("name") + "' " +
-                "where email like '" + req.get("user") + "';\n";
+                "where email like '" + email + "';\n";
         result = mySqlServer.executeUpdate(query);
         logger.info(resultUpdate(), result);
-        ResultSet resultSet = null;
-        Statement statement = mySqlServer.getStatement();
-        if (result == 1) {
-            query = "select * from users where email = '" + req.get("user") + "';";
-            resultSet = mySqlServer.executeSelect(query, statement);
-        } else {
-            status = noRequestedObject;
-            message = noUser();
-        }
 
-        ResultSet followee = null, follower = null, subscription = null;
-        Statement statement_followee = mySqlServer.getStatement(), statement_follower = mySqlServer.getStatement(), statement_subscription = mySqlServer.getStatement();
         try {
-            if (resultSet != null && resultSet.next()) {
-                query = "select email from users join follow on followee_id = id where follower_id = " + resultSet.getInt("id") + ";";
-                followee = mySqlServer.executeSelect(query, statement_followee);
-                query = "select email from users join follow on follower_id = id where followee_id = " + resultSet.getInt("id") + ";";
-                follower = mySqlServer.executeSelect(query, statement_follower);
-                query = "select thread_id from users join subscribtion on user_id = id where id = " + resultSet.getInt("id") + ";";
-                subscription = mySqlServer.executeSelect(query, statement_subscription);
-            } else {
-                resultSet = null;
-                status = noRequestedObject;
-                message = noUser();
-            }
-        } catch (SQLException e) {
-            logger.error(userDetailError());
-        }
-        try {
-            createResponse(response, status, message, resultSet, followee, follower, subscription);
+            createResponse(response, status, message, email);
         } catch (SQLException e) {
             logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
-        mySqlServer.closeExecution(resultSet, statement);
-        mySqlServer.closeExecution(followee, statement_followee);
-        mySqlServer.closeExecution(follower, statement_follower);
-        mySqlServer.closeExecution(subscription, statement_subscription);
         logger.info(finish());
     }
 
 
     @SuppressWarnings("unchecked")
-    private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet, ResultSet followee, ResultSet follower, ResultSet subscription) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
+    private void createResponse(HttpServletResponse response, short status, String message, String email) throws IOException, SQLException {
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        JSONArray toFollow = new JSONArray();
-        JSONArray iAmFollowed = new JSONArray();
-        JSONArray subscribed = new JSONArray();
 
-        if (status != ErrorMessages.ok || resultSet == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            data.put("error", message);
-        } else {
-            data.put("isAnonymous", resultSet.getBoolean("isAnonymous"));
-            data.put("email", resultSet.getString("email"));
-            data.put("about", resultSet.getString("about"));
-            data.put("name", resultSet.getString("name"));
-            data.put("username", resultSet.getString("username"));
-            data.put("id", resultSet.getInt("id"));
-            while(followee.next()) {
-                toFollow.add(followee.getString("email"));
-            }
-            while(follower.next()) {
-                iAmFollowed.add(follower.getString("email"));
-            }
-            while(subscription.next()) {
-                subscribed.add(subscription.getString("thread_id"));
-            }
-            data.put("following", toFollow);
-            data.put("followers", iAmFollowed);
-            data.put("subscriptions", subscribed);
+        if (status == ErrorMessages.ok) {
+            data = mySqlServer.getUserDetail(email);
         }
-        obj.put("response", data);
+        if (data == null) {
+            status = ErrorMessages.noRequestedObject;
+            message = ErrorMessages.noUser();
+        }
+        obj.put("response", status == ErrorMessages.ok? data: message);
         obj.put("code", status);
         logger.info(LoggerHelper.responseJSON(), obj.toString());
         response.getWriter().write(obj.toString());

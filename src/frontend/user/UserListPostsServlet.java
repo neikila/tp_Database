@@ -1,5 +1,6 @@
 package frontend.user;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -61,10 +62,7 @@ public class UserListPostsServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
-
+        CommonHelper.setResponse(response);
         JSONArray postList = new JSONArray();
         JSONObject post;
         if (resultSet != null) {
@@ -77,16 +75,10 @@ public class UserListPostsServlet extends HttpServlet {
             message = ErrorMessages.noPost();
         }
         JSONObject obj = new JSONObject();
-        JSONObject data = new JSONObject();
-        if (status != ErrorMessages.ok) {
-            data.put("error", message);
-            obj.put("response", data);
-        } else {
-            obj.put("response", postList);
 
-        }
-
+        obj.put("response", status == ErrorMessages.ok? postList: message);
         obj.put("code", status);
+
         logger.info(LoggerHelper.responseJSON(), obj.toString());
         response.getWriter().write(obj.toString());
     }

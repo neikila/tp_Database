@@ -1,5 +1,6 @@
 package frontend.user;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -41,9 +42,7 @@ public class UserDetailsServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String email) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONObject data = mySqlServer.getUserDetail(email);
 

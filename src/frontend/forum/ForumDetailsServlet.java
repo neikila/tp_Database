@@ -33,16 +33,8 @@ public class ForumDetailsServlet extends HttpServlet {
         String forum = request.getParameter("forum");
         String related = request.getParameter("related");
 
-        short status = ErrorMessages.ok;
-        String message = "";
-
-        if (related != null && !related.equals("user")) {
-            status = ErrorMessages.wrongData;
-            message = ErrorMessages.wrongJSONData();
-        }
-
         try {
-            createResponse(response, status, related, message, forum);
+            createResponse(response, related, forum);
         } catch (SQLException e) {
             logger.error(LoggerHelper.responseCreating());
             logger.error(e);
@@ -52,15 +44,23 @@ public class ForumDetailsServlet extends HttpServlet {
         logger.info(LoggerHelper.finish());
     }
 
-    private void createResponse(HttpServletResponse response, short status, String related, String message, String short_name) throws IOException, SQLException {
+    private void createResponse(HttpServletResponse response, String related, String short_name) throws IOException, SQLException {
         CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
-        JSONObject data;
+        JSONObject data = null;
 
-        data = mySqlServer.getForumDetails(short_name, related);
-        if (data == null) {
-            status = noRequestedObject;
-            message = noForum();
+        short status = ErrorMessages.ok;
+        String message = "";
+
+        if (related != null && !related.equals("user")) {
+            status = ErrorMessages.wrongData;
+            message = ErrorMessages.wrongJSONData();
+        } else {
+            data = mySqlServer.getForumDetails(short_name, related);
+            if (data == null) {
+                status = noRequestedObject;
+                message = noForum();
+            }
         }
 
         obj.put("response", status == ErrorMessages.ok ? data: message);

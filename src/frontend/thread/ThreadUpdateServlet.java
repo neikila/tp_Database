@@ -76,14 +76,17 @@ public class ThreadUpdateServlet extends HttpServlet {
 
     private void createResponse(HttpServletResponse response, short status, String message, long thread) throws IOException, SQLException {
         CommonHelper.setResponse(response);
+
         JSONObject obj = new JSONObject();
-        JSONObject data = new JSONObject();
-        if (status != ErrorMessages.ok) {
-            data.put("error", message);
-        } else {
+        JSONObject data = null;
+        if (status == ErrorMessages.ok) {
             data = mySqlServer.getThreadDetailsById((int)thread, false, false);
+            if (data == null) {
+                status = ErrorMessages.noRequestedObject;
+                message = ErrorMessages.noThread();
+            }
         }
-        obj.put("response", data);
+        obj.put("response", status == ErrorMessages.ok? data: message);
         obj.put("code", status);
         logger.info(LoggerHelper.responseJSON(), obj.toString());
         response.getWriter().write(obj.toString());
