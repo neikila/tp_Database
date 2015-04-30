@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
@@ -38,7 +39,10 @@ public class ThreadCreateServlet extends HttpServlet {
         }
         String short_name = (String) req.get("forum");
         String title = (String) req.get("title");
-        boolean isClosed = (boolean) req.get("isClosed");
+        boolean isClosed = false;
+        if (req.containsKey("isClosed")) {
+            isClosed = (boolean) req.get("isClosed");
+        }
         String user = (String) req.get("user");
         String messageThread = (String) req.get("message");
         String slug = (String) req.get("slug");
@@ -46,27 +50,30 @@ public class ThreadCreateServlet extends HttpServlet {
         short status = ok;
         String message = "";
         int result;
-        String query =
-                "insert into thread set " +
-                        "forum_id = (select id from forum where short_name = '" + short_name + "'), " +
-                        "title = '" + title + "', " +
-                        "isClosed = " + (isClosed ? 1 : 0) + ", " +
-                        "founder_id = (select id from users where email = '" + user + "'), " +
-                        "date_of_creating = '" + date + "', " +
-                        "message = '" + messageThread + "', " +
-                        "slug = '" + slug + "' " +
-                        (isDeleted ? ", isDeleted = 1;" : ";");
-        result = mySqlServer.executeUpdate(query);
+        StringBuilder query = new StringBuilder();
+        int forumId = mySqlServer.getForumIdByShortName(short_name);
+        query
+                .append("insert into thread set forum_id = ").append(forumId).append(", ")
+                .append("title = '").append(title).append("', ")
+                .append("isClosed = ").append(isClosed ? 1 : 0).append(", ")
+                .append("founder_id = (select id from users where email = '").append(user).append("'), ")
+                .append("date_of_creating = '").append(date).append("', ")
+                .append("message = '").append(messageThread).append("', ")
+                .append("slug = '").append(slug).append("' ")
+                .append(isDeleted ? ", isDeleted = 1;" : ";");
+        result = mySqlServer.executeUpdate(query.toString());
         logger.info(resultUpdate(), result);
-        ResultSet resultSet = null;
+        ResultSet resultSet;
         Statement statement = mySqlServer.getStatement();
-        query = "select thread.date_of_creating as date, forum.name as forum, thread.id, isClosed, isDeleted, message, slug, title, email as user " +
-                "from thread " +
-                "join users on founder_id = users.id " +
-                "join forum on forum.id = forum_id " +
-                "where slug = '" + slug + "' and " +
-                "forum.short_name = '" + short_name + "';";
-        resultSet = mySqlServer.executeSelect(query, statement);
+        query.delete(0, query.length());
+        query
+                .append("select thread.date_of_creating as date, forum.name as forum, thread.id, isClosed, isDeleted, message, slug, title, email as user ")
+                .append("from thread ")
+                .append("join users on founder_id = users.id ")
+                .append("join forum on forum.id = forum_id ")
+                .append("where slug = '").append(slug).append("' and ")
+                .append("forum.short_name = '").append(short_name).append("';");
+        resultSet = mySqlServer.executeSelect(query.toString(), statement);
         try {
             createResponse(response, status, message, resultSet);
         } catch (SQLException e) {
@@ -77,10 +84,7 @@ public class ThreadCreateServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
-
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
         if (status != ErrorMessages.ok) {

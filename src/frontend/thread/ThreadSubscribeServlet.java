@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -37,20 +38,15 @@ public class ThreadSubscribeServlet extends HttpServlet {
         String message = "";
 
         long threadId= 0;
-        if (req.containsKey("thread")) {
+        String email = (String)req.get("user");
+
+        if (req.containsKey("thread") && email != null) {
             threadId = (long)req.get("thread");
         } else {
-            status = 2;
-            message = "Wrong json";
+            status = ErrorMessages.notValidRequest;
+            message = ErrorMessages.wrongParamsOfRequest();
         }
 
-        String email = null;
-        if (req.containsKey("user")) {
-            email = (String)req.get("user");
-        } else {
-            status = 2;
-            message = "Wrong json";
-        }
 
         int result = 0;
         String query;
@@ -81,10 +77,7 @@ public class ThreadSubscribeServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, long threadId, String email) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
-
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
         if (status != ErrorMessages.ok) {

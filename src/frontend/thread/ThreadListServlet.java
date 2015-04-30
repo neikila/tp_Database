@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -47,18 +48,21 @@ public class ThreadListServlet extends HttpServlet {
             message = "Wrong data";
         }
 
-        String query;
+        StringBuilder query = new StringBuilder();
         ResultSet resultSet;
         Statement statement = mySqlServer.getStatement();
-        query = "select id from thread " +
-                (forum != null ? "where forum_id = (select id from forum where short_name = '" + forum + "') "
-                        : "where founder_id = (select id from users where email = '" + email + "') ") +
-                (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
-                "order by date_of_creating " +
-                (asc == null ? ("desc ") : asc + " ") +
-                (limit != null ? ("limit " + limit) : "") +
-                ";";
-        resultSet = mySqlServer.executeSelect(query, statement);
+        query
+                .append("select id from thread ");
+        if (forum != null) {
+            int forumId = mySqlServer.getForumIdByShortName(forum);
+            query.append("where forum_id = ").append(forumId).append(" ");
+        } else {
+            int authorId = mySqlServer.getUserIdByEmail(email);
+            query.append("where founder_id = ").append(authorId).append(" ");
+        }
+        CommonHelper.appendDateAndAscAndLimit(query, since, asc, limit);
+
+        resultSet = mySqlServer.executeSelect(query.toString(), statement);
         try {
             createResponse(response, status, message, resultSet);
         } catch (SQLException e) {
@@ -68,22 +72,17 @@ public class ThreadListServlet extends HttpServlet {
         }
 
         mySqlServer.closeExecution(resultSet, statement);
-
         logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
-        JSONObject data = new JSONObject();
 
         JSONArray listThreads = new JSONArray();
 
         if (status != ErrorMessages.ok || resultSet == null) {
-            data.put("error", message);
-            obj.put("response", data);
+            obj.put("response", message);
         } else {
             while (resultSet.next()) {
                 listThreads.add(mySqlServer.getThreadDetailsById(resultSet.getInt("id"), false, false));

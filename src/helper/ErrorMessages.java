@@ -37,6 +37,10 @@ public class ErrorMessages {
         return "No such post";
     }
 
+    public static String wrongParamsOfRequest() {
+        return "Wrong request params";
+    }
+
     public static String wrongJSONData() {
         return "Wrong JSON data";
     }

@@ -1,5 +1,6 @@
 package frontend.post;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -64,10 +65,7 @@ public class PostVoteServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, long postId) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
-
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONObject data;
         data = mySqlServer.getPostDetails((int)postId, false, false, false);

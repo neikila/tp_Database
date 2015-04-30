@@ -1,5 +1,6 @@
 package frontend.post;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -44,30 +45,27 @@ public class PostListServlet extends HttpServlet {
             message = ErrorMessages.wrongJSONData();
         }
 
-        String query;
+        StringBuilder query = new StringBuilder();
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
         if (status == ErrorMessages.ok) {
             if(forum == null) {
-                query = "select id from post " +
-                        "where thread = " + Integer.parseInt(thread_str) + " " +
-                        (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
-                        "order by date_of_creating " +
-                        (asc == null ? ("desc ") : asc + " ") +
-                        (limit != null ? ("limit " + limit) : "") +
-                        ";";
-                resultSet = mySqlServer.executeSelect(query, statement);
+                query
+                        .append("select id from post ")
+                        .append("where thread = ")
+                        .append(Integer.parseInt(thread_str)).append(" ");
+                CommonHelper.appendDateAndAscAndLimit(query, since, asc, limit);
+
+                resultSet = mySqlServer.executeSelect(query.toString(), statement);
             } else {
                 int forumId = mySqlServer.getForumIdByShortName(forum);
                 if (forumId > 0) {
-                    query = "select id from post " +
-                            "where forum_id = " + forumId + " " +
-                            (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
-                            "order by date_of_creating " +
-                            (asc == null ? ("desc ") : asc + " ") +
-                            (limit != null ? ("limit " + limit) : "") +
-                            ";";
-                    resultSet = mySqlServer.executeSelect(query, statement);
+                    query.delete(0, query.length());
+                    query.append("select id from post ")
+                            .append("where forum_id = ")
+                            .append(forumId).append(" ");
+                    CommonHelper.appendDateAndAscAndLimit(query, since, asc, limit);
+                    resultSet = mySqlServer.executeSelect(query.toString(), statement);
                 } else {
                     status = ErrorMessages.noRequestedObject;
                     message = ErrorMessages.noForum();
@@ -81,16 +79,12 @@ public class PostListServlet extends HttpServlet {
             logger.error(e);
             e.printStackTrace();
         }
-
         mySqlServer.closeExecution(resultSet, statement);
-
         logger.info(LoggerHelper.finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONArray listPosts = new JSONArray();
 

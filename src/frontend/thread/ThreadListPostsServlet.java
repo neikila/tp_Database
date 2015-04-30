@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -59,48 +60,51 @@ public class ThreadListPostsServlet extends HttpServlet {
             message = ErrorMessages.wrongJSONData();
         }
 
-        String query = null, subQuery = null;
+        StringBuilder query = new StringBuilder();
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
         if (status == ErrorMessages.ok) {
             switch (sortType) {
                 case 0:
-                    query = "select id from post " +
-                            "where thread = " + parseInt(thread_str) + " " +
-                            (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
-                            "order by date_of_creating " +
-                            (asc == null ? ("desc ") : asc + " ") +
-                            (limit != null ? ("limit " + limit) : "") +
-                            ";";
+                    query
+                            .append("select id from post ")
+                            .append("where thread = ")
+                            .append(parseInt(thread_str))
+                            .append(" ");
+                    CommonHelper.appendDateAndAscAndLimit(query, since, asc, limit);
                     break;
                 case 1:
-                    query = "select id from post " +
-                            "where thread = " + parseInt(thread_str) + " " +
-                            (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
-                            "order by parent, date_of_creating " +
-                            (asc == null ? ("desc ") : asc + " ") +
-                            (limit != null ? ("limit " + limit) : "") +
-                            ";";
-                    break;
-            }
-            if (query == null) {
-                subQuery = "select id from post where thread = " + parseInt(thread_str) + " and parent = '' order by date_of_creating limit " + limit + ";";
-                Statement statementSub = mySqlServer.getStatement();
-                ResultSet resultSetSub = mySqlServer.executeSelect(subQuery, statementSub);
-                StringBuilder parents = new StringBuilder();
-                parents.append("('000'");
-                try {
-                    while (resultSetSub.next()) {
-                        parents.append(" '" + format("%03d", resultSetSub.getInt("id")) + "'");
+                    query
+                            .append("select id from post ")
+                            .append("where thread = ").append(parseInt(thread_str)).append(" ");
+                    if (since != null) {
+                        query.append("and date_of_creating > '").append(since).append("' ");
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                parents.append(')');
-                mySqlServer.closeExecution(resultSetSub, statementSub);
-                query = "select id from post where thread = " + parseInt(thread_str) + " and LEFT(parent, 3) in " + parents + ";";
+                    query.append("order by parent, date_of_creating ");
+                    CommonHelper.appendLimitAndAsc(query, limit, asc);
+                    break;
+                case 2:
+                    String subQuery = null;
+                    subQuery = "select id from post where thread = " + parseInt(thread_str) + " and parent = '' order by date_of_creating limit " + limit + ";";
+                    Statement statementSub = mySqlServer.getStatement();
+                    ResultSet resultSetSub = mySqlServer.executeSelect(subQuery, statementSub);
+                    StringBuilder parents = new StringBuilder();
+                    parents.append("('000'");
+                    try {
+                        while (resultSetSub.next()) {
+                            parents.append(" '" + format("%03d", resultSetSub.getInt("id")) + "'");
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    parents.append(')');
+                    mySqlServer.closeExecution(resultSetSub, statementSub);
+                    query
+                            .append("select id from post where thread = ")
+                            .append(parseInt(thread_str))
+                            .append(" and LEFT(parent, 3) in ").append(parents).append(";");
             }
-            resultSet = mySqlServer.executeSelect(query, statement);
+            resultSet = mySqlServer.executeSelect(query.toString(), statement);
         }
         try {
             createResponse(response, status, message, resultSet);
@@ -116,9 +120,7 @@ public class ThreadListPostsServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONArray listPosts = new JSONArray();
 

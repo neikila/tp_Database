@@ -1,5 +1,6 @@
 package frontend.post;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -43,10 +44,13 @@ public class PostUpdateServlet extends HttpServlet {
         int result = 0;
 
         if (status == ErrorMessages.ok) {
-            final String query = "update post set " +
-                    "message = '" + messagePost + "' where " +
-                    " id = " + postId + " ;";
-            result = mySqlServer.executeUpdate(query);
+            StringBuilder query = new StringBuilder("update post set ");
+            query
+                    .append("message = '").append(messagePost)
+                    .append("' where ")
+                    .append(" id = ").append(postId)
+                    .append(" ;");
+            result = mySqlServer.executeUpdate(query.toString());
             logger.info(LoggerHelper.resultUpdate(), result);
         }
         if (result != 1) {
@@ -64,10 +68,7 @@ public class PostUpdateServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, long postId) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
-
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONObject data;
         data = mySqlServer.getPostDetails((int)postId, false, false, false);

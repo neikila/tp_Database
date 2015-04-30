@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -71,18 +72,21 @@ public class ThreadVoteServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, long threadId) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
-
-        JSONObject obj = new JSONObject();
-        JSONObject data = new JSONObject();
-        if (status != ErrorMessages.ok) {
-            data.put("error", message);
-        } else {
+        CommonHelper.setResponse(response);
+        JSONObject data = null;
+        if (status == ErrorMessages.ok) {
             data = mySqlServer.getThreadDetailsById((int)threadId, false, false);
         }
-        obj.put("response", data);
+        if (data == null) {
+            status = ErrorMessages.noRequestedObject;
+            message = ErrorMessages.noThread();
+        }
+        JSONObject obj = new JSONObject();
+        if (status == ErrorMessages.ok) {
+            obj.put("response", data);
+        } else {
+            obj.put("response", message);
+        }
         obj.put("code", status);
         logger.info(LoggerHelper.responseJSON(), obj.toString());
         response.getWriter().write(obj.toString());

@@ -1,5 +1,6 @@
 package frontend.forum;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -38,12 +39,21 @@ public class ForumCreateServlet extends HttpServlet {
         String email = (String)req.get("user");
         String shortName = (String)req.get("short_name");
         String forumName = (String)req.get("name");
+
+        if (email == null || shortName == null || forumName == null) {
+            status = ErrorMessages.wrongData;
+            message = ErrorMessages.wrongParamsOfRequest();
+        }
+
         int result = 0;
-        String query = "insert into forum set founder_id = " + mySqlServer.getUserIdByEmail(email) + ", " +
-                "name = '" + forumName + "', " +
-                "short_name = '" + shortName + "';\n";
+        StringBuilder query = new StringBuilder("insert into forum set ");
+        query
+                .append("founder_id = ").append(mySqlServer.getUserIdByEmail(email)).append(", ")
+                .append("name = '").append(forumName).append("', ")
+                .append("short_name = '").append(shortName)
+                .append("';\n");
         try {
-            result = mySqlServer.executeUpdate(query);
+            result = mySqlServer.executeUpdate(query.toString());
         } catch (Exception e) {
             logger.error(e);
             status = unknownError;
@@ -52,11 +62,17 @@ public class ForumCreateServlet extends HttpServlet {
         logger.info(LoggerHelper.resultUpdate(), result);
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
+        query.delete(0,query.length());
         if (result == 1) {
             // TODO forum: short_name ; cover: id, name
-            query = "select '" + email + "' as user, short_name, forum.id, forum.name from forum " +
-                    "where forum.short_name = '" + shortName + "';";
-            resultSet = mySqlServer.executeSelect(query, statement);
+            query
+                    .append("select '")
+                    .append(email)
+                    .append("' as user, short_name, forum.id, forum.name from forum ")
+                    .append("where forum.short_name = '")
+                    .append(shortName)
+                    .append("';");
+            resultSet = mySqlServer.executeSelect(query.toString(), statement);
         }
         try {
             createResponse(response, status, message, resultSet);
@@ -70,9 +86,7 @@ public class ForumCreateServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
+        CommonHelper.setResponse(response);
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();

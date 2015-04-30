@@ -1,5 +1,6 @@
 package frontend.forum;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -39,21 +40,25 @@ public class ForumListUsersServlet extends HttpServlet {
         short status = ErrorMessages.ok;
         String message = "";
 
-        String query;
+        StringBuilder query = new StringBuilder();
         ResultSet resultSet;
         Statement statement = mySqlServer.getStatement();
         int forumId = mySqlServer.getForumIdByShortName(forum);
         // TODO index user: id, name || post: forum_id, author_id
-        query = "select distinct p.author_id from post p " +
-                "join users u on p.author_id = u.id " +
-                "where p.forum_id = " + forumId + " " +
-                (since_id != null?("and p.author_id > " + since_id + " "):"") +
-                "order by u.name " +
-                (asc == null?("desc "):asc + " ") +
-                (limit != null?("limit " + limit):"") +
-                ";";
+        query
+                .append("select distinct p.author_id from post p join users u on p.author_id = u.id where p.forum_id = ")
+                .append(forumId)
+                .append(" ");
+        if (since_id != null) {
+            query
+                    .append("and p.author_id > ")
+                    .append(since_id)
+                    .append(" ");
+        }
+        query.append("order by u.name ");
+        CommonHelper.appendLimitAndAsc(query, limit, asc);
 
-        resultSet = mySqlServer.executeSelect(query, statement);
+        resultSet = mySqlServer.executeSelect(query.toString(), statement);
         try {
             createResponse(response, status, message, resultSet);
         } catch (SQLException e) {
@@ -68,9 +73,7 @@ public class ForumListUsersServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
 
         JSONArray listUser = new JSONArray();

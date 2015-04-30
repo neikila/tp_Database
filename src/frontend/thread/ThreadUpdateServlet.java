@@ -1,5 +1,6 @@
 package frontend.thread;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -38,13 +39,11 @@ public class ThreadUpdateServlet extends HttpServlet {
         String message = "";
 
         long thread= 0;
-        String messageThread = null;
-        String slug = null;
+        String messageThread = (String)req.get("message");
+        String slug = (String)req.get("slug");
 
-        if (req.containsKey("thread") && req.containsKey("message") && req.containsKey("slug")) {
+        if (req.containsKey("thread") && slug != null && messageThread != null) {
             thread = (long) req.get("thread");
-            messageThread = (String)req.get("message");
-            slug = (String)req.get("slug");
         } else {
             status = ErrorMessages.wrongData;
             message = ErrorMessages.wrongJSONData();
@@ -52,12 +51,12 @@ public class ThreadUpdateServlet extends HttpServlet {
 
         int result = 0;
 
-        String query;
         if (status == ErrorMessages.ok) {
+            String query;
             query = "update thread set " +
-                    "message = '" + messageThread + "'," +
-                    "slug = '" + slug + "'" +
-                    " where id = " + thread + " ;";
+                    "message = '" + messageThread + "', " +
+                    "slug = '" + slug + "' " +
+                    "where id = " + thread + ";";
             result = mySqlServer.executeUpdate(query);
             logger.info(resultUpdate(), result);
             if (result != 1) {
@@ -76,10 +75,7 @@ public class ThreadUpdateServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, long thread) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
-
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
         if (status != ErrorMessages.ok) {

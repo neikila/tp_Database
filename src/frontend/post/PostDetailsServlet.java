@@ -1,5 +1,6 @@
 package frontend.post;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -43,10 +44,7 @@ public class PostDetailsServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, int id, String[] related) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
-
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         boolean user = false;
         boolean forum = false;

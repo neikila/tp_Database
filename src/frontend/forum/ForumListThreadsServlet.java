@@ -1,5 +1,6 @@
 package frontend.forum;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -46,19 +47,17 @@ public class ForumListThreadsServlet extends HttpServlet {
 
         int forumId = mySqlServer.getForumIdByShortName(forum);
 
-        String query;
+        StringBuilder query = new StringBuilder();
         ResultSet resultSet;
         Statement statement = mySqlServer.getStatement();
-        // TODO index forum: short_name, id || thread: forum_id, date_of_creating
-        query = "select id from thread t " +
-                "where forum_id = '" + forumId + "' " +
-                (since != null?("and date_of_creating > '" + since + "' "):"") +
-                "order by date_of_creating " +
-                (asc == null?("desc "):asc + " ") +
-                (limit != null?("limit " + limit):"") +
-                ";";
 
-        resultSet = mySqlServer.executeSelect(query, statement);
+        // TODO index forum: short_name, id || thread: forum_id, date_of_creating
+        query.append("select id from thread t ")
+                .append("where forum_id = '")
+                .append(forumId)
+                .append("' ");
+        CommonHelper.appendDateAndAscAndLimit(query, since, asc, limit);
+        resultSet = mySqlServer.executeSelect(query.toString(), statement);
         try {
             createResponse(response, status, message, resultSet, related);
         } catch (SQLException e) {
@@ -72,9 +71,7 @@ public class ForumListThreadsServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet, String[] related) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
 

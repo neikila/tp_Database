@@ -1,5 +1,6 @@
 package frontend.post;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -69,7 +70,6 @@ public class PostCreateServlet extends HttpServlet {
         String date = (String)req.get("date");
         int result;
 
-        String query;
         String matPath = "";
         if (parentId != 0) {
             String parent = mySqlServer.getParentPathByParentId(parentId);
@@ -84,6 +84,8 @@ public class PostCreateServlet extends HttpServlet {
                 }
             }
         }
+
+        StringBuilder query = new StringBuilder();
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
         if (status == ErrorMessages.ok) {
@@ -92,26 +94,38 @@ public class PostCreateServlet extends HttpServlet {
             if (forumId > 0) {
                 if (authorId > 0) {
                     String forumName = mySqlServer.getForumNameById(forumId);
-                    query = "insert into post set " +
-                                    "thread = " + thread + ", " +
-                                    "message = '" + messagePost + "', " +
-                                    "author_id = " + authorId + ", " +
-                                    "date_of_creating = '" + date + "', " +
-                                    "forum_id = " + forumId + ", " +
-                                    "parent = '" + matPath + "', " +
-                                    "isApproved = " + (isApproved ? 1 : 0) + ", " +
-                                    "isHighlighted = " + (isHighlighted ? 1 : 0) + ", " +
-                                    "isEdited = " + (isEdited ? 1 : 0) + ", " +
-                                    "isSpam = " + (isSpam ? 1 : 0) + ", " +
-                                    "isDeleted = " + (isDeleted ? 1 : 0) + ";";
-                    result = mySqlServer.executeUpdate(query);
+                    query
+                            .append("insert into post set ")
+                            .append("thread = ").append(thread).append(", ")
+                            .append("message = '").append(messagePost).append("', ")
+                            .append("author_id = ").append(authorId).append(", ")
+                            .append("date_of_creating = '").append(date).append("', ")
+                            .append("forum_id = ").append(forumId).append(", ")
+                            .append("parent = '").append(matPath).append("', ")
+                            .append("isApproved = ").append(isApproved ? 1 : 0).append(", ")
+                            .append("isHighlighted = ").append(isHighlighted ? 1 : 0).append(", ")
+                            .append("isEdited = ").append(isEdited ? 1 : 0).append(", ")
+                            .append("isSpam = ").append(isSpam ? 1 : 0).append(", ")
+                            .append("isDeleted = ").append(isDeleted ? 1 : 0)
+                            .append(";");
+                    result = mySqlServer.executeUpdate(query.toString());
                     logger.info(LoggerHelper.resultUpdate(), result);
 
-                    query = "select post.id, post.date_of_creating as date, '" + forumName + "' as forum, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread, '" + email + "' as user " +
-                            "from post " +
-                            "where author_id = " + authorId + " and " +
-                            "post.date_of_creating = '" + date + "';";
-                    resultSet = mySqlServer.executeSelect(query, statement);
+                    query.delete(0, query.length());
+
+                    query
+                            .append("select post.id, post.date_of_creating as date, '")
+                            .append(forumName)
+                            .append("' as forum, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread, '").append(email)
+                            .append("' as user ")
+                            .append("from post ")
+                            .append("where author_id = ")
+                            .append(authorId)
+                            .append(" and ")
+                            .append("post.date_of_creating = '")
+                            .append(date)
+                            .append("';");
+                    resultSet = mySqlServer.executeSelect(query.toString(), statement);
                 } else {
                     status = ErrorMessages.noRequestedObject;
                     message = ErrorMessages.noUser();
@@ -135,10 +149,7 @@ public class PostCreateServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
-
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
         if (status != ErrorMessages.ok) {

@@ -1,5 +1,6 @@
 package frontend.forum;
 
+import helper.CommonHelper;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import mysql.MySqlConnect;
@@ -48,20 +49,19 @@ public class ForumListPostsServlet extends HttpServlet {
             message = wrongJSONData();
         }
 
-        String query;
+        StringBuilder query = new StringBuilder();
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
         int forumId = mySqlServer.getForumIdByShortName(forum);
         // TODO index forum: short_name, id || post: forum_id, date_of_creating
         if (status == ErrorMessages.ok) {
-            query = "select id from post " +
-                    "where forum_id = '" + forumId + "' " +
-                    (since != null ? ("and date_of_creating > '" + since + "' ") : "") +
-                    "order by date_of_creating " +
-                    (asc == null ? ("desc ") : asc + " ") +
-                    (limit != null ? ("limit " + limit) : "") +
-                    ";";
-            resultSet = mySqlServer.executeSelect(query, statement);
+            query
+                    .append("select id from post ")
+                    .append("where forum_id = '")
+                    .append(forumId)
+                    .append("' ");
+            CommonHelper.appendDateAndAscAndLimit(query, since, asc, limit);
+            resultSet = mySqlServer.executeSelect(query.toString(), statement);
         }
         try {
             createResponse(response, status, message, resultSet, related);
@@ -77,9 +77,7 @@ public class ForumListPostsServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet, String[] related) throws IOException, SQLException {
-        response.setContentType("json;charset=UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setStatus(HttpServletResponse.SC_OK);
+        CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
 
