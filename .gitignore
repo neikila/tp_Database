@@ -5,10 +5,7 @@
 **/out/*
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
-**/target/maven-status/*
-**/target/classes/*
-**/target/archive-tmp/*
-**/target/generated-sources/*
+**/target/*
 # Package Files #
 *.war
 *.ear

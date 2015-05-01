@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>L1.2</groupId>
-    <artifactId>L1.2</artifactId>
+    <groupId>DBApi</groupId>
+    <artifactId>DBApi</artifactId>
     <version>1.0</version>
 
     <properties>
@@ -15,6 +15,7 @@
     </properties>
 
     <build>
+        <sourceDirectory>${project.basedir}/src</sourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -30,6 +31,16 @@
                 </configuration>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <targetPath>.</targetPath>
+                <directory>${project.basedir}/cfg</directory>
+                <includes>
+                    <include>log4j2.xml</include>
+                </includes>
+            </resource>
+        </resources>
+
     </build>
 
     <dependencies>
