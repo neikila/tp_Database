@@ -4,7 +4,6 @@ package mysql;
  * Created by neikila on 08.03.15.
  */
 
-import com.sun.istack.internal.Nullable;
 import helper.ErrorMessages;
 import helper.LoggerHelper;
 import org.apache.logging.log4j.LogManager;
@@ -41,7 +40,6 @@ public class MySqlConnect {
         }
     }
 
-    @Nullable
     public Statement getStatement() {
         try {
             return connection.createStatement();
