@@ -262,8 +262,8 @@ public class MySqlConnect {
             }
             else {
                 resultSet = null;
-                status = 1;
-                message = "There is no user with such email!";
+                status = ErrorMessages.noRequestedObject;
+                message = ErrorMessages.noUser();
                 logger.error(message);
             }
         } catch (SQLException e) {

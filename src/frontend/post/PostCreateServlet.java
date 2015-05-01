@@ -58,9 +58,10 @@ public class PostCreateServlet extends HttpServlet {
             isSpam = (boolean) req.get("isSpam");
         }
 
+
         long parentId = 0;
         if (req.containsKey("parent")) {
-            parentId = (long) req.get("parent");
+            parentId = req.get("parent") == null ? 0 : (long)req.get("parent") ;
         }
 
         String shortName = (String)req.get("forum");

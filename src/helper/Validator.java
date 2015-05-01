@@ -7,18 +7,18 @@ import org.json.simple.JSONObject;
  */
 public class Validator {
     public static boolean userValidation(JSONObject user) {
-        if ((String)user.get("email") == null) {
+        if (user.get("email") == null) {
             return false;
         }
-        if ((String)user.get("name") == null) {
+        if (user.get("name") == null) {
             user.remove("name");
             user.put("name", "");
         }
-        if ((String)user.get("about") == null) {
+        if (user.get("about") == null) {
             user.remove("about");
             user.put("about", "");
         }
-        if ((String)user.get("username") == null) {
+        if (user.get("username") == null) {
             user.remove("username");
             user.put("username", "");
         }

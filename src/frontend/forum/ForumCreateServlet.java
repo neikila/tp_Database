@@ -66,12 +66,8 @@ public class ForumCreateServlet extends HttpServlet {
         if (result == 1) {
             // TODO forum: short_name ; cover: id, name
             query
-                    .append("select '")
-                    .append(email)
-                    .append("' as user, short_name, forum.id, forum.name from forum ")
-                    .append("where forum.short_name = '")
-                    .append(shortName)
-                    .append("';");
+                    .append("select '").append(email).append("' as user, short_name, forum.id, forum.name from forum ")
+                    .append("where forum.short_name = '").append(shortName).append("';");
             resultSet = mySqlServer.executeSelect(query.toString(), statement);
         }
         try {
@@ -90,16 +86,18 @@ public class ForumCreateServlet extends HttpServlet {
 
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status != ErrorMessages.ok) {
-            data.put("error", message);
-        } else {
-            resultSet.next();
-            data.put("name", resultSet.getString("name"));
-            data.put("user", resultSet.getString("user"));
-            data.put("short_name", resultSet.getString("short_name"));
-            data.put("id", resultSet.getString("id"));
+        if (status == ErrorMessages.ok) {
+            if (resultSet.next()) {
+                data.put("name", resultSet.getString("name"));
+                data.put("user", resultSet.getString("user"));
+                data.put("short_name", resultSet.getString("short_name"));
+                data.put("id", resultSet.getString("id"));
+            } else {
+                status = ErrorMessages.noRequestedObject;
+                message = ErrorMessages.noForum();
+            }
+            obj.put("response", status == ErrorMessages.ok? data: message);
         }
-        obj.put("response", data);
         obj.put("code", status);
         logger.info(LoggerHelper.responseJSON(), obj.toString());
         response.getWriter().write(obj.toString());

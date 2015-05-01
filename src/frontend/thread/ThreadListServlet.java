@@ -44,8 +44,8 @@ public class ThreadListServlet extends HttpServlet {
         String limit = request.getParameter("limit");
 
         if (forum == null && email == null) {
-            status = 3;
-            message = "Wrong data";
+            status = ErrorMessages.wrongData;
+            message = ErrorMessages.wrongJSONData();
         }
 
         StringBuilder query = new StringBuilder();
