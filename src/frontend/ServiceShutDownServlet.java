@@ -19,6 +19,7 @@ public class ServiceShutDownServlet extends HttpServlet {
                       HttpServletResponse response) throws ServletException, IOException {
         if (request.getParameter("ShutDown").equals("true")) {
             logger.error(MessageStorage.shutDown());
+            System.out.println("Bye-bye");
             System.exit(0);
         } else {
             super.doGet(request, response);

@@ -62,6 +62,22 @@ public class MySqlConnect {
         return resultSet;
     }
 
+    public int executeCreate(String query) {
+        int id = -1;
+        try {
+            Statement statement = connection.createStatement();
+            logger.info(LoggerHelper.query(), query);
+            statement.executeUpdate(query);
+            ResultSet resultSet = statement.getGeneratedKeys();
+            if (resultSet != null && resultSet.next()) {
+                id = resultSet.getInt(1);
+            }
+            statement.close();
+        } catch (SQLException ex) {
+            logger.error(ex);
+        }
+        return id;
+    }
 
     public int executeUpdate(String query){
         int result = 0;

@@ -13,9 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
@@ -86,9 +84,8 @@ public class PostCreateServlet extends HttpServlet {
             }
         }
 
+        JSONObject data = null;
         StringBuilder query = new StringBuilder();
-        ResultSet resultSet = null;
-        Statement statement = mySqlServer.getStatement();
         if (status == ErrorMessages.ok) {
             int authorId = mySqlServer.getUserIdByEmail(email);
             int forumId = mySqlServer.getForumIdByShortName(shortName);
@@ -109,24 +106,29 @@ public class PostCreateServlet extends HttpServlet {
                             .append("isSpam = ").append(isSpam ? 1 : 0).append(", ")
                             .append("isDeleted = ").append(isDeleted ? 1 : 0)
                             .append(";");
-                    result = mySqlServer.executeUpdate(query.toString());
+                    result = mySqlServer.executeCreate(query.toString());
                     logger.info(LoggerHelper.resultUpdate(), result);
 
-                    query.delete(0, query.length());
-
-                    query
-                            .append("select post.id, post.date_of_creating as date, '")
-                            .append(forumName)
-                            .append("' as forum, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread, '").append(email)
-                            .append("' as user ")
-                            .append("from post ")
-                            .append("where author_id = ")
-                            .append(authorId)
-                            .append(" and ")
-                            .append("post.date_of_creating = '")
-                            .append(date)
-                            .append("';");
-                    resultSet = mySqlServer.executeSelect(query.toString(), statement);
+                    if (result != -1) {
+                        data = new JSONObject();
+                        data.put("date", data);
+                        data.put("forum", forumName);
+                        data.put("id", result);
+                        data.put("isApproved", isApproved);
+                        data.put("isHighlighted", isHighlighted);
+                        data.put("isEdited", isEdited);
+                        data.put("isSpam", isSpam);
+                        data.put("isDeleted", isDeleted);
+                        data.put("message", messagePost);
+                        if (matPath.equals("")) {
+                            data.put("parent", null);
+                        }else {
+                            // TODO коссссяк
+                            data.put("parent", Integer.parseInt(matPath.substring(matPath.length() - 3)));
+                        }
+                        data.put("thread", thread);
+                        data.put("user", email);
+                    }
                 } else {
                     status = ErrorMessages.noRequestedObject;
                     message = ErrorMessages.noUser();
@@ -139,43 +141,22 @@ public class PostCreateServlet extends HttpServlet {
             }
         }
         try {
-            createResponse(response, status, message, resultSet);
+            createResponse(response, status, message, data);
         } catch (SQLException e) {
             logger.error(LoggerHelper.responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
-        mySqlServer.closeExecution(resultSet, statement);
         logger.info(LoggerHelper.finish());
     }
 
-    private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {
+    private void createResponse(HttpServletResponse response, short status, String message, JSONObject data) throws IOException, SQLException {
         CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
-        JSONObject data = new JSONObject();
         if (status != ErrorMessages.ok) {
             data.put("error", message);
         } else {
-            if (resultSet.next()) {
-                data.put("date", resultSet.getString("date").substring(0, 19));
-                data.put("forum", resultSet.getString("forum"));
-                data.put("id", resultSet.getInt("id"));
-                data.put("isApproved", resultSet.getBoolean("isApproved"));
-                data.put("isHighlighted", resultSet.getBoolean("isHighlighted"));
-                data.put("isEdited", resultSet.getBoolean("isEdited"));
-                data.put("isSpam", resultSet.getBoolean("isSpam"));
-                data.put("isDeleted", resultSet.getBoolean("isDeleted"));
-                data.put("message", resultSet.getString("message"));
-                String temp = resultSet.getString("parent");
-                if (temp.equals("")) {
-                    data.put("parent", null);
-                }else {
-                    data.put("parent", Integer.parseInt(temp.substring(temp.length() - 3)));
-                }
-                data.put("thread", resultSet.getInt("thread"));
-                data.put("user", resultSet.getString("user"));
-
-            } else {
+            if (data == null) {
                 status = ErrorMessages.noRequestedObject;
                 data.put("error", "Error while PostCreate");
             }

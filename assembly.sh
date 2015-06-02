@@ -4,7 +4,6 @@ cp target/DBApi-1.0-jar-with-dependencies.jar .
 mkdir server -p
 rm server/* -rf
 cp DBApi-1.0-jar-with-dependencies.jar server/.
-cp -r server_tml server/.
 cp -r public_html server/.
 cp -r cfg server/.
 cp -r start.sh server/.

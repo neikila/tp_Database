@@ -9,6 +9,7 @@
 **/server/*
 # Package Files #
 *.war
+*.jar
 *.tar.gz
 *.ear
 
