@@ -47,7 +47,7 @@ create table `thread` (
 key (`forum_id`, `date_of_creating`),
 primary key (`id`),
 foreign key(`founder_id`) references `users`(id),
-foreign key(`forum_id`, `date_of_creating`) references `forum`(id)
+foreign key(`forum_id`) references `forum`(id)
 ) engine=InnoDB default charset=cp1251;
 
 create table `post` (
@@ -70,7 +70,7 @@ key (`forum_id`, `author_id`, `date_of_creating`),
 key (`thread`, `date_of_creating`),
 foreign key(`author_id`) references `users`(id),
 foreign key(`forum_id`) references `forum`(id),
-foreign key(`thread`) references `thread`(id),
+foreign key(`thread`) references `thread`(id)
 ) engine=InnoDB default charset=cp1251;
 
 create table `subscribtion` (
