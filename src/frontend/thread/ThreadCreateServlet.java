@@ -52,11 +52,12 @@ public class ThreadCreateServlet extends HttpServlet {
         int result;
         StringBuilder query = new StringBuilder();
         int forumId = mySqlServer.getForumIdByShortName(short_name);
+        int founder_id = mySqlServer.getUserIdByEmail(user);
         query
                 .append("insert into thread set forum_id = ").append(forumId).append(", ")
                 .append("title = '").append(title).append("', ")
                 .append("isClosed = ").append(isClosed ? 1 : 0).append(", ")
-                .append("founder_id = (select id from users where email = '").append(user).append("'), ")
+                .append("founder_id = " + founder_id + ", ")
                 .append("date_of_creating = '").append(date).append("', ")
                 .append("message = '").append(messageThread).append("', ")
                 .append("slug = '").append(slug).append("' ")

@@ -84,8 +84,7 @@ public class ThreadListPostsServlet extends HttpServlet {
                     CommonHelper.appendLimitAndAsc(query, limit, asc);
                     break;
                 case 2:
-                    String subQuery = null;
-                    subQuery = "select id from post where thread = " + parseInt(thread_str) + " and parent = '' order by date_of_creating limit " + limit + ";";
+                    String subQuery = "select id from post where thread = " + parseInt(thread_str) + " and parent = '' order by date_of_creating limit " + limit + ";";
                     Statement statementSub = mySqlServer.getStatement();
                     ResultSet resultSetSub = mySqlServer.executeSelect(subQuery, statementSub);
                     StringBuilder parents = new StringBuilder();
