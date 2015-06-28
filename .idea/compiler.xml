@@ -23,11 +23,13 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
+        <module name="DBApi" />
         <module name="Game" />
         <module name="L1.2" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="DBApi" target="1.8" />
       <module name="Game" target="1.8" />
       <module name="L1.2" target="1.8" />
     </bytecodeTargetLevel>

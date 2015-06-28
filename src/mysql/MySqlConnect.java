@@ -57,6 +57,7 @@ public class MySqlConnect {
             logger.info(LoggerHelper.query(), query);
             resultSet = statement.executeQuery(query);
         } catch (SQLException ex) {
+            logger.error("query:\n{}", query);
             logger.error(ex);
         }
         return resultSet;
@@ -127,7 +128,7 @@ public class MySqlConnect {
             if(resultSet1.next()) {
                 parent = resultSet1.getString("parent");
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             logger.error(e);
             e.printStackTrace();
         }
@@ -323,7 +324,7 @@ public class MySqlConnect {
     public JSONObject getForumDetails(String short_name, String related) throws IOException, SQLException {
         ResultSet resultSet;
         Statement statement = getStatement();
-
+// todo убрать join
         String query = "select forum.id, founder_id, forum.name, short_name, email from forum " +
                 "join users on founder_id = users.id " +
                 "where short_name = '" + short_name +"';";
@@ -353,7 +354,7 @@ public class MySqlConnect {
         ResultSet resultSetCount;
         Statement statementCount = getStatement();
 
-        String query = "select count(*) as amount from post where thread = " + id + " and isDeleted = 0;";
+        String query = "select count(1) as amount from post where thread = " + id + " and isDeleted = 0;";
 
         resultSetCount = executeSelect(query, statementCount);
 
@@ -408,7 +409,7 @@ public class MySqlConnect {
 
         ResultSet resultSet;
         Statement statement = getStatement();
-
+// todo убрать join
         String query = "select post.id, post.date_of_creating as date, post.likes, post.dislikes, forum.short_name as forum, short_name, isAnonymous, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread, email as user " +
                 "from post " +
                 "join forum on forum.id = forum_id " +

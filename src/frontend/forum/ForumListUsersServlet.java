@@ -45,17 +45,22 @@ public class ForumListUsersServlet extends HttpServlet {
         Statement statement = mySqlServer.getStatement();
         int forumId = mySqlServer.getForumIdByShortName(forum);
         // TODO index user: id, name || post: forum_id, author_id
-        query
-                .append("select distinct p.author_id from post p join users u on p.author_id = u.id where p.forum_id = ")
-                .append(forumId)
-                .append(" ");
         if (since_id != null) {
             query
+                    .append("select distinct p.author_id from post p join users u on p.author_id = u.id where p.forum_id = ")
+                    .append(forumId)
+                    .append(" ")
                     .append("and p.author_id > ")
                     .append(since_id)
-                    .append(" ");
+                    .append(" ")
+                    .append("order by u.name ");
+        } else {
+            query
+                    .append("select distinct author_id from post p where forum_id = ")
+                    .append(forumId)
+                    .append(" ")
+                    .append("order by name ");
         }
-        query.append("order by u.name ");
         CommonHelper.appendLimitAndAsc(query, limit, asc);
 
         resultSet = mySqlServer.executeSelect(query.toString(), statement);

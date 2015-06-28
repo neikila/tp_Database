@@ -106,7 +106,8 @@ public class PostCreateServlet extends HttpServlet {
                             .append("isHighlighted = ").append(isHighlighted ? 1 : 0).append(", ")
                             .append("isEdited = ").append(isEdited ? 1 : 0).append(", ")
                             .append("isSpam = ").append(isSpam ? 1 : 0).append(", ")
-                            .append("isDeleted = ").append(isDeleted ? 1 : 0)
+                            .append("isDeleted = ").append(isDeleted ? 1 : 0).append(", ")
+                            .append("name = '(select u.name from users u where u.id = ").append(authorId).append(")'")
                             .append(";");
                     result = mySqlServer.executeUpdate(query.toString());
                     logger.info(LoggerHelper.resultUpdate(), result);
@@ -116,7 +117,7 @@ public class PostCreateServlet extends HttpServlet {
                     query
                             .append("select post.id ")
                             .append("from post ")
-                            .append("where forum_id = forum_id and author_id = ")
+                            .append("where forum_id = ").append(forumId).append(" and author_id = ")
                             .append(authorId)
                             .append(" and ")
                             .append("post.date_of_creating = '")
