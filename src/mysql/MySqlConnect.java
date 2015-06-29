@@ -443,7 +443,7 @@ public class MySqlConnect {
 
         ResultSet resultSet;
         Statement statement = getStatement();
-        String query = "select id, date_of_creating as date, likes, dislikes, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread " +
+        String query = "select id, author_id, forum_id, date_of_creating as date, likes, dislikes, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread " +
                 "from post " +
                 "where post.id = " + id + ";";
 
