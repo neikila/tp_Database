@@ -19,6 +19,7 @@ public class MySqlConnect {
     private static Logger logger = LogManager.getLogger(MySqlConnect.class.getName());
 
     private static Connection connection;
+    private PreparedStatement postDetailsPrepStatement = null;
 
     public MySqlConnect() {
         try {
@@ -29,11 +30,13 @@ public class MySqlConnect {
         properties.setProperty("useUnicode","true");
         properties.setProperty("characterEncoding","windows-1251");
 
-
         connection = null;
         String url = "jdbc:mysql://localhost:3306/SMDB";
             connection = DriverManager.getConnection(url, properties);
             logger.info(LoggerHelper.connection(), url);
+
+            String query = "select id, author_id, forum_id, date_of_creating as date, likes, dislikes, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread from post where post.id = ?;";
+            postDetailsPrepStatement = connection.prepareStatement(query);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
@@ -436,18 +439,20 @@ public class MySqlConnect {
             logger.error(e);
             e.printStackTrace();
         }
+        closeExecution(resultSet, statement);
         return null;
     }
 
     public JSONObject getPostDetails(int id, boolean user, boolean thread, boolean forum) throws IOException, SQLException {
 
-        ResultSet resultSet;
-        Statement statement = getStatement();
-        String query = "select id, author_id, forum_id, date_of_creating as date, likes, dislikes, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread " +
-                "from post " +
-                "where post.id = " + id + ";";
+        postDetailsPrepStatement.setInt(1, id);
 
-        resultSet = executeSelect(query, statement);
+        ResultSet resultSet = postDetailsPrepStatement.executeQuery();
+//        Statement statement = getStatement();
+//        String query = "select id, author_id, forum_id, date_of_creating as date, likes, dislikes, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread " +
+//                "from post where post.id = ?;";
+
+//        resultSet = executeSelect(query, statement);
 
         JSONObject data = new JSONObject();
         if (resultSet.next()) {
@@ -470,7 +475,10 @@ public class MySqlConnect {
                     data.put("forum", null);
                     e.printStackTrace();
                     logger.error(e);
-                    logger.error(query);
+                    logger.error("Error in getting post details");
+//                    logger.error(query);
+                } finally {
+                    closeExecution(forumResultSet, forumStatement);
                 }
             }
             data.put("id", resultSet.getInt("id"));
@@ -505,7 +513,8 @@ public class MySqlConnect {
         } else {
             data = null;
         }
-        closeExecution(resultSet, statement);
+        resultSet.close();
+//        closeExecution(resultSet, statement);
         return data;
     }
 }
