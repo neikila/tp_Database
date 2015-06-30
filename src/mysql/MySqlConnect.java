@@ -19,7 +19,7 @@ public class MySqlConnect {
     private static Logger logger = LogManager.getLogger(MySqlConnect.class.getName());
 
     private static Connection connection;
-    private PreparedStatement postDetailsPrepStatement = null;
+//    private PreparedStatement postDetailsPrepStatement = null;
 
     public MySqlConnect() {
         try {
@@ -35,8 +35,8 @@ public class MySqlConnect {
             connection = DriverManager.getConnection(url, properties);
             logger.info(LoggerHelper.connection(), url);
 
-            String query = "select id, author_id, forum_id, date_of_creating as date, likes, dislikes, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread from post where post.id = ?;";
-            postDetailsPrepStatement = connection.prepareStatement(query);
+//            String query = "select id, author_id, forum_id, date_of_creating as date, likes, dislikes, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread from post where post.id = ?;";
+//            postDetailsPrepStatement = connection.prepareStatement(query);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
@@ -447,14 +447,14 @@ public class MySqlConnect {
 
     public JSONObject getPostDetails(int id, boolean user, boolean thread, boolean forum) throws IOException, SQLException {
 
-        postDetailsPrepStatement.setInt(1, id);
+//        postDetailsPrepStatement.setInt(1, id);
 
         ResultSet resultSet = postDetailsPrepStatement.executeQuery();
-//        Statement statement = getStatement();
-//        String query = "select id, author_id, forum_id, date_of_creating as date, likes, dislikes, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread " +
-//                "from post where post.id = ?;";
+        Statement statement = getStatement();
+        String query = "select id, author_id, forum_id, date_of_creating as date, likes, dislikes, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread " +
+                "from post where post.id = ?;";
 
-//        resultSet = executeSelect(query, statement);
+        resultSet = executeSelect(query, statement);
 
         JSONObject data = new JSONObject();
         if (resultSet.next()) {
@@ -516,7 +516,7 @@ public class MySqlConnect {
             data = null;
         }
         resultSet.close();
-//        closeExecution(resultSet, statement);
+        closeExecution(resultSet, statement);
         return data;
     }
 }
