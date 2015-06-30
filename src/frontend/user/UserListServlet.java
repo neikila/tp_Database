@@ -19,6 +19,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static helper.ErrorMessages.ok;
+import static helper.LoggerHelper.*;
+
 
 public class UserListServlet extends HttpServlet {
     private Logger logger = LogManager.getLogger(UserListServlet.class.getName());
@@ -26,13 +29,14 @@ public class UserListServlet extends HttpServlet {
     private MySqlConnect mySqlServer;
 
     public UserListServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
-        short status = ErrorMessages.ok;
+        logger.info(start());
+        mySqlServer = new MySqlConnect(true);
+        short status = ok;
         String message = "";
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
@@ -40,12 +44,13 @@ public class UserListServlet extends HttpServlet {
         try {
             createResponse(response, status, message, resultSet);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
         mySqlServer.closeExecution(resultSet, statement);
-        logger.info(LoggerHelper.finish());
+        mySqlServer.close();
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {

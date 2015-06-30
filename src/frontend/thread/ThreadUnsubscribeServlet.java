@@ -15,9 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static helper.ErrorMessages.noRequestedObject;
-import static helper.ErrorMessages.noThread;
-import static helper.LoggerHelper.resultUpdate;
+import static helper.ErrorMessages.*;
+import static helper.LoggerHelper.*;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadUnsubscribeServlet extends HttpServlet {
@@ -26,26 +25,27 @@ public class ThreadUnsubscribeServlet extends HttpServlet {
     private MySqlConnect mySqlServer;
 
     public ThreadUnsubscribeServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
+        mySqlServer = new MySqlConnect(true);
 
         JSONObject req = getJSONFromRequest(request, "ThreadUnsubscribeServlet");
 
-        short status = ErrorMessages.ok;
+        short status = ok;
         String message = "";
 
-        long threadId= 0;
-        String email = (String)req.get("user");
+        long threadId = 0;
+        String email = (String) req.get("user");
 
         if (req.containsKey("thread") && email != null) {
-            threadId = (long)req.get("thread");
+            threadId = (long) req.get("thread");
         } else {
-            status = ErrorMessages.notValidRequest;
-            message = ErrorMessages.wrongParamsOfRequest();
+            status = notValidRequest;
+            message = wrongParamsOfRequest();
         }
 
         int result = 0;
@@ -53,11 +53,11 @@ public class ThreadUnsubscribeServlet extends HttpServlet {
 
         int userId = mySqlServer.getUserIdByEmail(email);
         if (userId < 1) {
-            status = ErrorMessages.noRequestedObject;
-            message = ErrorMessages.noUser();
+            status = noRequestedObject;
+            message = noUser();
         }
 
-        if (status == ErrorMessages.ok) {
+        if (status == ok) {
             query = "delete subscribtion from subscribtion where user_id = " + userId + " and thread_id = " + threadId + ";";
             result = mySqlServer.executeUpdate(query);
             logger.info(resultUpdate(), result);
@@ -70,12 +70,13 @@ public class ThreadUnsubscribeServlet extends HttpServlet {
         try {
             createResponse(response, status, message, threadId, email);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
 
-        logger.info(LoggerHelper.finish());
+        mySqlServer.close();
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, long threadId, String email) throws IOException, SQLException {

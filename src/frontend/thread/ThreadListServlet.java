@@ -18,7 +18,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static helper.ErrorMessages.ok;
+import static helper.CommonHelper.appendDateAndAscAndLimit;
+import static helper.ErrorMessages.*;
 import static helper.LoggerHelper.*;
 
 public class ThreadListServlet extends HttpServlet {
@@ -27,12 +28,13 @@ public class ThreadListServlet extends HttpServlet {
     private MySqlConnect mySqlServer;
 
     public ThreadListServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(start());
+        mySqlServer = new MySqlConnect(true);
 
         short status = ok;
         String message = "";
@@ -44,8 +46,8 @@ public class ThreadListServlet extends HttpServlet {
         String limit = request.getParameter("limit");
 
         if (forum == null && email == null) {
-            status = ErrorMessages.wrongData;
-            message = ErrorMessages.wrongJSONData();
+            status = wrongData;
+            message = wrongJSONData();
         }
 
         StringBuilder query = new StringBuilder();
@@ -60,7 +62,7 @@ public class ThreadListServlet extends HttpServlet {
             int authorId = mySqlServer.getUserIdByEmail(email);
             query.append("where founder_id = ").append(authorId).append(" ");
         }
-        CommonHelper.appendDateAndAscAndLimit(query, since, asc, limit);
+        appendDateAndAscAndLimit(query, since, asc, limit);
 
         resultSet = mySqlServer.executeSelect(query.toString(), statement);
         try {
@@ -72,6 +74,7 @@ public class ThreadListServlet extends HttpServlet {
         }
 
         mySqlServer.closeExecution(resultSet, statement);
+        mySqlServer.close();
         logger.info(finish());
     }
 

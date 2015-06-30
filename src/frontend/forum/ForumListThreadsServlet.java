@@ -19,8 +19,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
-import static helper.ErrorMessages.wrongData;
-import static helper.ErrorMessages.wrongJSONData;
+import static helper.CommonHelper.appendDateAndAscAndLimit;
+import static helper.ErrorMessages.*;
+import static helper.LoggerHelper.*;
 
 public class ForumListThreadsServlet extends HttpServlet {
     private Logger logger = LogManager.getLogger(ForumListThreadsServlet.class.getName());
@@ -28,12 +29,13 @@ public class ForumListThreadsServlet extends HttpServlet {
     private MySqlConnect mySqlServer;
 
     public ForumListThreadsServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
+        mySqlServer = new MySqlConnect(true);
 
         Map<String, String[]> paramMap = request.getParameterMap();
         String forum = paramMap.containsKey("forum") ? paramMap.get("forum")[0] : null;
@@ -42,7 +44,7 @@ public class ForumListThreadsServlet extends HttpServlet {
         String limit = paramMap.containsKey("limit") ? paramMap.get("limit")[0] : null;
         String[] related = paramMap.get("related");
 
-        short status = ErrorMessages.ok;
+        short status = ok;
         String message = "";
 
         int forumId = mySqlServer.getForumIdByShortName(forum);
@@ -56,18 +58,19 @@ public class ForumListThreadsServlet extends HttpServlet {
                 .append("where forum_id = '")
                 .append(forumId)
                 .append("' ");
-        CommonHelper.appendDateAndAscAndLimit(query, since, asc, limit);
+        appendDateAndAscAndLimit(query, since, asc, limit);
         resultSet = mySqlServer.executeSelect(query.toString(), statement);
         try {
             createResponse(response, status, message, resultSet, related);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
         mySqlServer.closeExecution(resultSet, statement);
 
-        logger.info(LoggerHelper.finish());
+        mySqlServer.close();
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet, String[] related) throws IOException, SQLException {

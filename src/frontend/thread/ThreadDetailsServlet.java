@@ -16,35 +16,37 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
 
-import static helper.ErrorMessages.wrongData;
-import static helper.ErrorMessages.wrongJSONData;
+import static helper.ErrorMessages.*;
+import static helper.LoggerHelper.*;
 
 public class ThreadDetailsServlet extends HttpServlet {
     private Logger logger = LogManager.getLogger(ThreadDetailsServlet.class.getName());
     private MySqlConnect mySqlServer;
 
     public ThreadDetailsServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
+        mySqlServer = new MySqlConnect(true);
         Map<String, String[]> paramMap = request.getParameterMap();
 
         String thread = request.getParameter("thread");
         String[] related = paramMap.get("related");
-        short status = ErrorMessages.ok;
+        short status = ok;
 
         try {
             createResponse(response, status, thread, related);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
 
-        logger.info(LoggerHelper.finish());
+        mySqlServer.close();
+        logger.info(finish());
     }
 
 

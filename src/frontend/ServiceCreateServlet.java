@@ -1,6 +1,5 @@
 package frontend;
 
-import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,18 +12,21 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static helper.LoggerHelper.finish;
+
 public class ServiceCreateServlet extends HttpServlet {
     private final Logger logger = LogManager.getLogger(ServiceCreateServlet.class.getName());
 
     private MySqlConnect mySqlServer;
 
     public ServiceCreateServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info("Truncate All!");
+        mySqlServer = new MySqlConnect(true);
         int result = 0;
         String queryCreateUser = "create table `users` (\n" +
                 "`id` mediumint unsigned auto_increment not null,\n" +
@@ -105,7 +107,8 @@ public class ServiceCreateServlet extends HttpServlet {
         } catch (SQLException e) {
             logger.info("Error while creating response for truncate");
         }
-        logger.info(LoggerHelper.finish());
+        mySqlServer.close();
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, int result) throws IOException, SQLException {

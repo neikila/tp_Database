@@ -18,6 +18,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static helper.CommonHelper.appendDateAndAscAndLimit;
+import static helper.CommonHelper.appendLimitAndAsc;
+import static helper.ErrorMessages.*;
+import static helper.LoggerHelper.*;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 
@@ -27,14 +31,15 @@ public class ThreadListPostsServlet extends HttpServlet {
     private MySqlConnect mySqlServer;
 
     public ThreadListPostsServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
+        mySqlServer = new MySqlConnect(true);
 
-        short status = ErrorMessages.ok;
+        short status = ok;
         String message = "";
 
         String thread_str = request.getParameter("thread");
@@ -50,20 +55,26 @@ public class ThreadListPostsServlet extends HttpServlet {
         }
 
         switch (sort) {
-            case "flat": sortType = 0; break;
-            case "tree": sortType = 1; break;
-            case "parent_tree": sortType = 2; break;
+            case "flat":
+                sortType = 0;
+                break;
+            case "tree":
+                sortType = 1;
+                break;
+            case "parent_tree":
+                sortType = 2;
+                break;
         }
 
-        if(thread_str == null || Integer.parseInt(thread_str) == 0 || sortType == -1) {
-            status = ErrorMessages.wrongData;
-            message = ErrorMessages.wrongJSONData();
+        if (thread_str == null || parseInt(thread_str) == 0 || sortType == -1) {
+            status = wrongData;
+            message = wrongJSONData();
         }
 
         StringBuilder query = new StringBuilder();
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
-        if (status == ErrorMessages.ok) {
+        if (status == ok) {
             switch (sortType) {
                 case 0:
                     query
@@ -71,7 +82,7 @@ public class ThreadListPostsServlet extends HttpServlet {
                             .append("where thread = ")
                             .append(parseInt(thread_str))
                             .append(" ");
-                    CommonHelper.appendDateAndAscAndLimit(query, since, asc, limit);
+                    appendDateAndAscAndLimit(query, since, asc, limit);
                     break;
                 case 1:
                     query
@@ -81,7 +92,7 @@ public class ThreadListPostsServlet extends HttpServlet {
                         query.append("and date_of_creating > '").append(since).append("' ");
                     }
                     query.append("order by parent, date_of_creating ");
-                    CommonHelper.appendLimitAndAsc(query, limit, asc);
+                    appendLimitAndAsc(query, limit, asc);
                     break;
                 case 2:
                     String subQuery = "select id from post where thread = " + parseInt(thread_str) + " and parent = '' order by date_of_creating limit " + limit + ";";
@@ -108,14 +119,15 @@ public class ThreadListPostsServlet extends HttpServlet {
         try {
             createResponse(response, status, message, resultSet);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
 
         mySqlServer.closeExecution(resultSet, statement);
 
-        logger.info(LoggerHelper.finish());
+        mySqlServer.close();
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {

@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static helper.ErrorMessages.*;
+import static helper.LoggerHelper.*;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class PostUpdateServlet extends HttpServlet {
@@ -22,28 +24,30 @@ public class PostUpdateServlet extends HttpServlet {
     private MySqlConnect mySqlServer;
 
     public PostUpdateServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
+        mySqlServer = new MySqlConnect(true);
         JSONObject req = getJSONFromRequest(request, "PostUpdate");
 
-        short status = ErrorMessages.ok;
+        short status = ok;
         String message = "";
 
-        String messagePost = (String) req.get("message");;
+        String messagePost = (String) req.get("message");
+        ;
         long postId = (long) req.get("post");
 
         if (postId == 0 || messagePost == null) {
-            status = ErrorMessages.wrongData;
-            message = ErrorMessages.wrongJSONData();
+            status = wrongData;
+            message = wrongJSONData();
         }
 
         int result = 0;
 
-        if (status == ErrorMessages.ok) {
+        if (status == ok) {
             StringBuilder query = new StringBuilder("update post set ");
             query
                     .append("message = '").append(messagePost)
@@ -51,20 +55,21 @@ public class PostUpdateServlet extends HttpServlet {
                     .append(" id = ").append(postId)
                     .append(" ;");
             result = mySqlServer.executeUpdate(query.toString());
-            logger.info(LoggerHelper.resultUpdate(), result);
+            logger.info(resultUpdate(), result);
         }
         if (result != 1) {
-            status = ErrorMessages.noRequestedObject;
-            message = ErrorMessages.noPost();
+            status = noRequestedObject;
+            message = noPost();
         }
         try {
             createResponse(response, status, message, postId);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
-        logger.info(LoggerHelper.finish());
+        mySqlServer.close();
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, long postId) throws IOException, SQLException {

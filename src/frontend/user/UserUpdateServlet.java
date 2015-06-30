@@ -25,12 +25,13 @@ public class UserUpdateServlet extends HttpServlet {
     private MySqlConnect mySqlServer;
 
     public UserUpdateServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(start());
+        mySqlServer = new MySqlConnect(true);
 
         JSONObject req = getJSONFromRequest(request, "UserCreate");
 
@@ -58,6 +59,7 @@ public class UserUpdateServlet extends HttpServlet {
             logger.error(e);
             e.printStackTrace();
         }
+        mySqlServer.close();
         logger.info(finish());
     }
 

@@ -17,18 +17,20 @@ import java.sql.SQLException;
 
 import static helper.ErrorMessages.noForum;
 import static helper.ErrorMessages.noRequestedObject;
+import static helper.LoggerHelper.*;
 
 public class ForumDetailsServlet extends HttpServlet {
     private Logger logger = LogManager.getLogger(ForumDetailsServlet.class.getName());
     private MySqlConnect mySqlServer;
 
     public ForumDetailsServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
+        mySqlServer = new MySqlConnect(true);
 
         String forum = request.getParameter("forum");
         String related = request.getParameter("related");
@@ -36,12 +38,13 @@ public class ForumDetailsServlet extends HttpServlet {
         try {
             createResponse(response, related, forum);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
 
-        logger.info(LoggerHelper.finish());
+        mySqlServer.close();
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, String related, String short_name) throws IOException, SQLException {

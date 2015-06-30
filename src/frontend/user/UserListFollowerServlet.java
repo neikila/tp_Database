@@ -18,6 +18,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static helper.CommonHelper.appendLimitAndAsc;
+import static helper.CommonHelper.appendSinceId;
 import static helper.ErrorMessages.ok;
 import static helper.LoggerHelper.*;
 
@@ -27,12 +29,13 @@ public class UserListFollowerServlet extends HttpServlet {
     private MySqlConnect mySqlServer;
 
     public UserListFollowerServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(start());
+        mySqlServer = new MySqlConnect(true);
         String email = request.getParameter("user");
         String asc = request.getParameter("order");
         String since_id = request.getParameter("since");
@@ -47,9 +50,9 @@ public class UserListFollowerServlet extends HttpServlet {
         int userId = mySqlServer.getUserIdByEmail(email);
         query
                 .append("select id from users join follow on id = follower_id where followee_id = ").append(userId).append(" ");
-        CommonHelper.appendSinceId(query, since_id);
+        appendSinceId(query, since_id);
         query.append("order by name ");
-        CommonHelper.appendLimitAndAsc(query, limit, asc);
+        appendLimitAndAsc(query, limit, asc);
         resultSet = mySqlServer.executeSelect(query.toString(), statement);
 
         try {
@@ -60,6 +63,7 @@ public class UserListFollowerServlet extends HttpServlet {
             e.printStackTrace();
         }
         mySqlServer.closeExecution(resultSet, statement);
+        mySqlServer.close();
         logger.info(finish());
     }
 

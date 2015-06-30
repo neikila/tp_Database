@@ -25,18 +25,19 @@ public class UserUnfollowServlet extends HttpServlet {
     private MySqlConnect mySqlServer;
 
     public UserUnfollowServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(start());
+        mySqlServer = new MySqlConnect(true);
 
         JSONObject req = getJSONFromRequest(request, "UserFollow");
 
         String email = (String) req.get("follower");
 
-        long followee_id = mySqlServer.getUserIdByEmail((String)req.get("followee"));
+        long followee_id = mySqlServer.getUserIdByEmail((String) req.get("followee"));
         long follower_id = mySqlServer.getUserIdByEmail(email);
 
         String query = "delete from follow where " +
@@ -54,6 +55,7 @@ public class UserUnfollowServlet extends HttpServlet {
             logger.error(e);
             e.printStackTrace();
         }
+        mySqlServer.close();
         logger.info(finish());
     }
 

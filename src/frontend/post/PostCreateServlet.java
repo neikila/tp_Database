@@ -17,6 +17,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static helper.ErrorMessages.*;
+import static helper.LoggerHelper.*;
+import static java.lang.Integer.parseInt;
+import static java.lang.String.format;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class PostCreateServlet extends HttpServlet {
@@ -24,14 +28,15 @@ public class PostCreateServlet extends HttpServlet {
     private MySqlConnect mySqlServer;
 
     public PostCreateServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
+        mySqlServer = new MySqlConnect(true);
         JSONObject req = getJSONFromRequest(request, "PostCreateServlet");
-        short status = ErrorMessages.ok;
+        short status = ok;
         String message = "";
 
         //TODO Сюда нужен еще один валидатор
@@ -61,34 +66,34 @@ public class PostCreateServlet extends HttpServlet {
 
         long parentId = 0;
         if (req.containsKey("parent")) {
-            parentId = req.get("parent") == null ? 0 : (long)req.get("parent") ;
+            parentId = req.get("parent") == null ? 0 : (long) req.get("parent");
         }
 
-        String shortName = (String)req.get("forum");
-        String email = (String)req.get("user");
-        String messagePost = (String)req.get("message");
-        long thread =  (long)req.get("thread");
-        String date = (String)req.get("date");
+        String shortName = (String) req.get("forum");
+        String email = (String) req.get("user");
+        String messagePost = (String) req.get("message");
+        long thread = (long) req.get("thread");
+        String date = (String) req.get("date");
         int result;
 
         String matPath = "";
         if (parentId != 0) {
             String parent = mySqlServer.getParentPathByParentId(parentId);
             if (parent == null) {
-                status = ErrorMessages.noRequestedObject;
-                message = ErrorMessages.noParent();
+                status = noRequestedObject;
+                message = noParent();
             } else {
                 if (parent.equals("")) {
-                    matPath = String.format("%03d", parentId);
+                    matPath = format("%03d", parentId);
                 } else {
-                    matPath = parent + String.format("_%03d", parentId);
+                    matPath = parent + format("_%03d", parentId);
                 }
             }
         }
 
         JSONObject data = null;
         StringBuilder query = new StringBuilder();
-        if (status == ErrorMessages.ok) {
+        if (status == ok) {
             int authorId = mySqlServer.getUserIdByEmail(email);
             int forumId = mySqlServer.getForumIdByShortName(shortName);
             if (forumId > 0) {
@@ -110,7 +115,7 @@ public class PostCreateServlet extends HttpServlet {
                             .append("name = '").append(mySqlServer.getNameById(authorId)).append("'")
                             .append(";");
                     result = mySqlServer.executeUpdate(query.toString());
-                    logger.info(LoggerHelper.resultUpdate(), result);
+                    logger.info(resultUpdate(), result);
 
                     if (result == 1) {
                         query.delete(0, query.length());
@@ -119,7 +124,7 @@ public class PostCreateServlet extends HttpServlet {
                                 .append(thread)
                                 .append(';');
                         result = mySqlServer.executeUpdate(query.toString());
-                        logger.info(LoggerHelper.resultUpdate(), result);
+                        logger.info(resultUpdate(), result);
                     }
 
                     query.delete(0, query.length());
@@ -162,36 +167,37 @@ public class PostCreateServlet extends HttpServlet {
                         data.put("message", messagePost);
                         if (matPath.equals("")) {
                             data.put("parent", null);
-                        }else {
+                        } else {
                             // TODO коссссяк
                             int indexLast = matPath.lastIndexOf("_");
-                            data.put("parent", Integer.parseInt(matPath.substring(indexLast + 1)));
+                            data.put("parent", parseInt(matPath.substring(indexLast + 1)));
                         }
                         data.put("thread", thread);
                         data.put("user", email);
                     } else {
-                        status = ErrorMessages.noRequestedObject;
+                        status = noRequestedObject;
                         message = "Error while PostCreate";
                     }
                 } else {
-                    status = ErrorMessages.noRequestedObject;
-                    message = ErrorMessages.noUser();
-                    logger.info(LoggerHelper.noUserOrForum());
+                    status = noRequestedObject;
+                    message = noUser();
+                    logger.info(noUserOrForum());
                 }
             } else {
-                status = ErrorMessages.noRequestedObject;
-                message = ErrorMessages.noForum();
-                logger.info(LoggerHelper.noUserOrForum());
+                status = noRequestedObject;
+                message = noForum();
+                logger.info(noUserOrForum());
             }
         }
         try {
             createResponse(response, status, message, data);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
-        logger.info(LoggerHelper.finish());
+        mySqlServer.close();
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, JSONObject data) throws IOException, SQLException {

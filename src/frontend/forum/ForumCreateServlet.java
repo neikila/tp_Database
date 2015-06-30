@@ -17,8 +17,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static helper.ErrorMessages.forumCreateError;
-import static helper.ErrorMessages.unknownError;
+import static helper.ErrorMessages.*;
+import static helper.LoggerHelper.*;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ForumCreateServlet extends HttpServlet {
@@ -27,22 +27,23 @@ public class ForumCreateServlet extends HttpServlet {
     private MySqlConnect mySqlServer;
 
     public ForumCreateServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
+        mySqlServer = new MySqlConnect(true);
         JSONObject req = getJSONFromRequest(request, "ForumCreateServlet");
-        short status = ErrorMessages.ok;
+        short status = ok;
         String message = "";
-        String email = (String)req.get("user");
-        String shortName = (String)req.get("short_name");
-        String forumName = (String)req.get("name");
+        String email = (String) req.get("user");
+        String shortName = (String) req.get("short_name");
+        String forumName = (String) req.get("name");
 
         if (email == null || shortName == null || forumName == null) {
-            status = ErrorMessages.wrongData;
-            message = ErrorMessages.wrongParamsOfRequest();
+            status = wrongData;
+            message = wrongParamsOfRequest();
         }
 
         int result = 0;
@@ -59,10 +60,10 @@ public class ForumCreateServlet extends HttpServlet {
             status = unknownError;
             message = forumCreateError();
         }
-        logger.info(LoggerHelper.resultUpdate(), result);
+        logger.info(resultUpdate(), result);
         ResultSet resultSet = null;
         Statement statement = mySqlServer.getStatement();
-        query.delete(0,query.length());
+        query.delete(0, query.length());
         if (result == 1) {
             // TODO forum: short_name ; cover: id, name
             query
@@ -73,12 +74,13 @@ public class ForumCreateServlet extends HttpServlet {
         try {
             createResponse(response, status, message, resultSet);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
         mySqlServer.closeExecution(resultSet, statement);
-        logger.info(LoggerHelper.finish());
+        mySqlServer.close();
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {

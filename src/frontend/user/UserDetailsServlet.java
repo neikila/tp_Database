@@ -15,30 +15,36 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static helper.ErrorMessages.ok;
+import static helper.LoggerHelper.*;
+
 public class UserDetailsServlet extends HttpServlet {
     private Logger logger = LogManager.getLogger(UserDetailsServlet.class.getName());
 
     private MySqlConnect mySqlServer;
 
     public UserDetailsServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+//        this.mySqlServer = mySqlServer;
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
+        mySqlServer = new MySqlConnect(true);
         String email = request.getParameter("user");
 
-        short status = ErrorMessages.ok;
+        short status = ok;
 
         try {
             createResponse(response, status, email);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
-        logger.info(LoggerHelper.finish());
+
+        mySqlServer.close();
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String email) throws IOException, SQLException {

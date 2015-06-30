@@ -2,6 +2,7 @@ package frontend.thread;
 
 import helper.CommonHelper;
 import helper.ErrorMessages;
+import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,7 +18,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import static helper.ErrorMessages.ok;
-import static helper.LoggerHelper.*;
+import static helper.ErrorMessages.unknownError;
+import static helper.LoggerHelper.responseCreating;
+import static helper.LoggerHelper.resultUpdate;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadCreateServlet extends HttpServlet {
@@ -26,12 +29,13 @@ public class ThreadCreateServlet extends HttpServlet {
     private MySqlConnect mySqlServer;
 
     public ThreadCreateServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(start());
+        logger.info(LoggerHelper.start());
+        mySqlServer = new MySqlConnect(true);
         JSONObject req = getJSONFromRequest(request, "ThreadCreate");
         boolean isDeleted = false;
         if (req.containsKey("isDeleted")) {
@@ -78,7 +82,7 @@ public class ThreadCreateServlet extends HttpServlet {
             resultSet = mySqlServer.executeSelect(query.toString(), statement);
         } else {
             message = "Such tread already exists";
-            status = ErrorMessages.unknownError;
+            status = unknownError;
         }
         try {
             createResponse(response, status, message, resultSet);
@@ -86,7 +90,8 @@ public class ThreadCreateServlet extends HttpServlet {
             logger.error(responseCreating());
         }
         mySqlServer.closeExecution(resultSet, statement);
-        logger.info(finish());
+        mySqlServer.close();
+        logger.info(LoggerHelper.finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {

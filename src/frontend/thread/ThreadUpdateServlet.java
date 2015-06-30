@@ -15,9 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static helper.ErrorMessages.noRequestedObject;
-import static helper.ErrorMessages.noThread;
-import static helper.LoggerHelper.resultUpdate;
+import static helper.ErrorMessages.*;
+import static helper.LoggerHelper.*;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadUpdateServlet extends HttpServlet {
@@ -26,32 +25,33 @@ public class ThreadUpdateServlet extends HttpServlet {
     private MySqlConnect mySqlServer;
 
     public ThreadUpdateServlet(MySqlConnect mySqlServer) {
-        this.mySqlServer = mySqlServer;
+        // this.mySqlServer = mySqlServer;
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
+        logger.info(start());
+        mySqlServer = new MySqlConnect(true);
 
         JSONObject req = getJSONFromRequest(request, "PostUpdate");
 
-        short status = ErrorMessages.ok;
+        short status = ok;
         String message = "";
 
-        long thread= 0;
-        String messageThread = (String)req.get("message");
-        String slug = (String)req.get("slug");
+        long thread = 0;
+        String messageThread = (String) req.get("message");
+        String slug = (String) req.get("slug");
 
         if (req.containsKey("thread") && slug != null && messageThread != null) {
             thread = (long) req.get("thread");
         } else {
-            status = ErrorMessages.wrongData;
-            message = ErrorMessages.wrongJSONData();
+            status = wrongData;
+            message = wrongJSONData();
         }
 
         int result = 0;
 
-        if (status == ErrorMessages.ok) {
+        if (status == ok) {
             String query;
             query = "update thread set " +
                     "message = '" + messageThread + "', " +
@@ -67,11 +67,12 @@ public class ThreadUpdateServlet extends HttpServlet {
         try {
             createResponse(response, status, message, thread);
         } catch (SQLException e) {
-            logger.error(LoggerHelper.responseCreating());
+            logger.error(responseCreating());
             logger.error(e);
             e.printStackTrace();
         }
-        logger.info(LoggerHelper.finish());
+        mySqlServer.close();
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, long thread) throws IOException, SQLException {
