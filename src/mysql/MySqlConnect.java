@@ -449,7 +449,7 @@ public class MySqlConnect {
 
 //        postDetailsPrepStatement.setInt(1, id);
 
-        ResultSet resultSet = postDetailsPrepStatement.executeQuery();
+        ResultSet resultSet = null;//postDetailsPrepStatement.executeQuery();
         Statement statement = getStatement();
         String query = "select id, author_id, forum_id, date_of_creating as date, likes, dislikes, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread " +
                 "from post where post.id = ?;";
