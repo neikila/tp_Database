@@ -427,7 +427,7 @@ public class MySqlConnect {
     }
 
     public String getEmailById(int id) {
-        String query = "select email use index (id__email) from users where id = " + id + ";";
+        String query = "select email from users use index (id__email) where id = " + id + ";";
         Statement statement = getStatement();
 
         ResultSet resultSet = executeSelect(query, statement);
