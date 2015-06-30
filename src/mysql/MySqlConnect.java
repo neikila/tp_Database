@@ -452,12 +452,12 @@ public class MySqlConnect {
         ResultSet resultSet = null;//postDetailsPrepStatement.executeQuery();
         Statement statement = getStatement();
         String query = "select id, author_id, forum_id, date_of_creating as date, likes, dislikes, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread " +
-                "from post where post.id = ?;";
+                "from post where post.id = " + id + ";";
 
         resultSet = executeSelect(query, statement);
 
         JSONObject data = new JSONObject();
-        if (resultSet.next()) {
+        if (resultSet != null && resultSet.next()) {
             data.put("date", resultSet.getString("date").substring(0, 19));
             if (forum) {
                 data.put("forum", getForumDetailsById(resultSet.getInt("forum_id"), null));
