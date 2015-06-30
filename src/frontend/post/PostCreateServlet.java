@@ -107,7 +107,7 @@ public class PostCreateServlet extends HttpServlet {
                             .append("isEdited = ").append(isEdited ? 1 : 0).append(", ")
                             .append("isSpam = ").append(isSpam ? 1 : 0).append(", ")
                             .append("isDeleted = ").append(isDeleted ? 1 : 0).append(", ")
-                            .append("name = '(select u.name from users u where u.id = ").append(authorId).append(")'")
+                            .append("name = '").append(mySqlServer.getNameById(authorId)).append("'")
                             .append(";");
                     result = mySqlServer.executeUpdate(query.toString());
                     logger.info(LoggerHelper.resultUpdate(), result);
@@ -119,6 +119,7 @@ public class PostCreateServlet extends HttpServlet {
                                 .append(thread)
                                 .append(';');
                         result = mySqlServer.executeUpdate(query.toString());
+                        logger.info(LoggerHelper.resultUpdate(), result);
                     }
 
                     query.delete(0, query.length());

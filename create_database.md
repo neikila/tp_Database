@@ -1,3 +1,5 @@
+drop database SMDB;
+
 create database SMDB;
 
 use SMDB;
@@ -67,7 +69,7 @@ create table `post` (
 `date_of_creating` TIMESTAMP default NOW(),
 `likes` mediumint default 0,
 `dislikes` mediumint default 0,
-`name` char(64) not null default '',
+`name` char(64) not null,
 primary key (`id`),
 key `forum_id` (`forum_id`,`author_id`,`date_of_creating`),
 key `thread` (`thread`,`date_of_creating`),
