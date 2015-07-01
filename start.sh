@@ -1,1 +1,1 @@
-java -jar -server -XX:MinHeapFreeRatio=40 -XX:+UseFastAccessorMethods -XX:+OptimizeStringConcat -Xms300m -Xmx300m -Xmn50m -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -verbose:gc -Xloggc:gc.log -XX:+UseConcMarkSweepGC DBApi-1.0-jar-with-dependencies.jar
+java -jar -server -XX:MinHeapFreeRatio=40 -XX:+UseFastAccessorMethods -XX:+OptimizeStringConcat -Xms100m -Xmx100m -Xmn50m -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -verbose:gc -Xloggc:gc.log -XX:+UseConcMarkSweepGC DBApi-1.0-jar-with-dependencies.jar

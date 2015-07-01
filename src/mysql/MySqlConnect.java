@@ -291,13 +291,13 @@ public class MySqlConnect {
             data.put("name", resultSet.getString("name").equals("") ? null : resultSet.getString("name"));
             data.put("username", resultSet.getString("username").equals("")? null : resultSet.getString("username") );
             data.put("id", resultSet.getInt("id"));
-            while(followee.next()) {
+            while(followee != null && followee.next()) {
                 toFollow.add(followee.getString(1));
             }
-            while(follower.next()) {
+            while(follower != null && follower.next()) {
                 iAmFollowed.add(follower.getString(1));
             }
-            while(subscription.next()) {
+            while(subscription != null && subscription.next()) {
                 subscribed.add(subscription.getInt(1));
             }
             data.put("following", toFollow);
