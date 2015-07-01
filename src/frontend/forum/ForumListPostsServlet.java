@@ -113,7 +113,7 @@ public class ForumListPostsServlet extends HttpServlet {
             }
             if (status == ErrorMessages.ok) {
                 mySqlServer.prepareStatementsForPostDetails();
-                while (resultSet.next()) {
+                while (resultSet != null && resultSet.next()) {
                     listPosts.add(mySqlServer.getPostDetailsWithPrepareStatement(resultSet.getInt("id"), user, thread, forum));
                 }
                 mySqlServer.closePrepareStatementForPostDetails();

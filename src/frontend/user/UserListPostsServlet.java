@@ -69,7 +69,7 @@ public class UserListPostsServlet extends HttpServlet {
         JSONArray postList = new JSONArray();
         if (resultSet != null) {
             mySqlServer.prepareStatementsForPostDetails();
-            while (resultSet.next()) {
+            while (resultSet != null && resultSet.next()) {
                 postList.add(mySqlServer.getPostDetailsWithPrepareStatement(resultSet.getInt("id"), false, false, false));
             }
             mySqlServer.closePrepareStatementForPostDetails();

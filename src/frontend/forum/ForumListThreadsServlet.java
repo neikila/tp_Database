@@ -105,7 +105,7 @@ public class ForumListThreadsServlet extends HttpServlet {
             }
             if (status == ErrorMessages.ok) {
                 mySqlServer.prepareStatementsForThreadDetails(user, forum);
-                while (resultSet.next()) {
+                while (resultSet != null && resultSet.next()) {
                     listThreads.add(mySqlServer.getThreadDetailsByIdWithPreparedStatements(resultSet.getInt("id"), user, forum));
                 }
                 mySqlServer.closeStatementsForThreadDetails(user, forum);

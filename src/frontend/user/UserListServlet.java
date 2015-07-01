@@ -59,7 +59,7 @@ public class UserListServlet extends HttpServlet {
         JSONObject user;
 
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-        while(resultSet.next()) {
+        while(resultSet != null && resultSet.next()) {
             user = new JSONObject();
 
             int numberOfColumns = resultSetMetaData.getColumnCount();

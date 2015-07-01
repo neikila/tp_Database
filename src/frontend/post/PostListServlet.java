@@ -99,7 +99,7 @@ public class PostListServlet extends HttpServlet {
             obj.put("response", message);
         } else {
             mySqlServer.prepareStatementsForPostDetails();
-            while (resultSet.next()) {
+            while (resultSet != null && resultSet.next()) {
                 listPosts.add(mySqlServer.getPostDetailsWithPrepareStatement(resultSet.getInt("id"), false, false, false));
             }
             mySqlServer.closePrepareStatementForPostDetails();

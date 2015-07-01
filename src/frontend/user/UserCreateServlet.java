@@ -92,7 +92,7 @@ public class UserCreateServlet extends HttpServlet {
         CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status == ErrorMessages.ok && resultSet.next()) {
+        if (status == ErrorMessages.ok && resultSet != null && resultSet.next()) {
             data.put("isAnonymous", resultSet.getBoolean("isAnonymous"));
             data.put("email", resultSet.getString("email"));
             data.put("about", resultSet.getString("about"));

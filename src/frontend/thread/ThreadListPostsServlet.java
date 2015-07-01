@@ -101,7 +101,7 @@ public class ThreadListPostsServlet extends HttpServlet {
                     StringBuilder parents = new StringBuilder();
                     parents.append("('000'");
                     try {
-                        while (resultSetSub.next()) {
+                        while (resultSetSub != null && resultSetSub.next()) {
                             parents.append(" '" + format("%03d", resultSetSub.getInt("id")) + "'");
                         }
                     } catch (SQLException e) {

@@ -92,7 +92,7 @@ public class ForumListUsersServlet extends HttpServlet {
         if (status != ErrorMessages.ok || resultSet == null) {
             obj.put("response", message);
         } else {
-            while (resultSet.next()) {
+            while (resultSet != null && resultSet.next()) {
                 listUser.add(mySqlServer.getUserDetail(resultSet.getInt("author_id")));
             }
             obj.put("response", listUser);

@@ -75,7 +75,7 @@ public class UserListFollowerServlet extends HttpServlet {
         if (status != ErrorMessages.ok || resultSet == null) {
             obj.put("response", message);
         } else {
-            while (resultSet.next()) {
+            while (resultSet != null && resultSet.next()) {
                 iAmFollowed.add(mySqlServer.getUserDetail(resultSet.getInt("id")));
             }
             obj.put("response", iAmFollowed);
