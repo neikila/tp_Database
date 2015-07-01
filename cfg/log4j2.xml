@@ -25,7 +25,7 @@
         </Async>
     </Appenders>
     <Loggers>
-        <Root level="error">
+        <Root level="fatal">
             <AppenderRef ref="AsyncFile"/>
             <AppenderRef ref="AsyncConsole"/>
         </Root>

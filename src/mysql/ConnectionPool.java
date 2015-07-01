@@ -35,7 +35,7 @@ public class ConnectionPool  {
         Class.forName(DRIVER).newInstance();
 
         connectionPool = new GenericObjectPool();
-        connectionPool.setMaxActive(4);
+        connectionPool.setMaxActive(8);
 
         Properties properties=new Properties();
         properties.setProperty("user","admin");
@@ -46,8 +46,8 @@ public class ConnectionPool  {
         ConnectionFactory cf = new DriverManagerConnectionFactory(
                 URL,
                 properties);
-
         new PoolableConnectionFactory(cf, connectionPool, null, null, false, true);
+
         dataSource = new PoolingDataSource(connectionPool);
     }
 
