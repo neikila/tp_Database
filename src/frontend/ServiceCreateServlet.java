@@ -19,14 +19,14 @@ public class ServiceCreateServlet extends HttpServlet {
 
     private MySqlConnect mySqlServer;
 
-    public ServiceCreateServlet(MySqlConnect mySqlServer) {
-        // this.mySqlServer = mySqlServer;
+    public ServiceCreateServlet() {
+        this.mySqlServer = new MySqlConnect();
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info("Truncate All!");
-        mySqlServer = new MySqlConnect(true);
+        mySqlServer.init();
         int result = 0;
         String queryCreateUser = "create table `users` (\n" +
                 "`id` mediumint unsigned auto_increment not null,\n" +

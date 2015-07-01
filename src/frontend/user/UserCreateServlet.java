@@ -20,6 +20,7 @@ import java.sql.Statement;
 import static helper.ErrorMessages.*;
 import static helper.LoggerHelper.*;
 import static helper.Validator.userValidation;
+import static java.lang.System.currentTimeMillis;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class UserCreateServlet extends HttpServlet {
@@ -27,14 +28,16 @@ public class UserCreateServlet extends HttpServlet {
 
     private MySqlConnect mySqlServer;
 
-    public UserCreateServlet(MySqlConnect mySqlServer) {
-//        this.mySqlServer = mySqlServer;
+    public UserCreateServlet() {
+        this.mySqlServer = new MySqlConnect();
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(start());
-        mySqlServer = new MySqlConnect(true);
+        long a = currentTimeMillis();
+        while (currentTimeMillis() - a < 10) ;
+        mySqlServer.init();
 
         JSONObject req = getJSONFromRequest(request, "UserCreateServlet");
         boolean isAnonymous = false;
@@ -89,8 +92,7 @@ public class UserCreateServlet extends HttpServlet {
         CommonHelper.setResponse(response);
         JSONObject obj = new JSONObject();
         JSONObject data = new JSONObject();
-        if (status == ErrorMessages.ok) {
-            resultSet.next();
+        if (status == ErrorMessages.ok && resultSet.next()) {
             data.put("isAnonymous", resultSet.getBoolean("isAnonymous"));
             data.put("email", resultSet.getString("email"));
             data.put("about", resultSet.getString("about"));

@@ -2,7 +2,6 @@ package frontend.thread;
 
 import helper.CommonHelper;
 import helper.ErrorMessages;
-import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,8 +18,7 @@ import java.sql.Statement;
 
 import static helper.ErrorMessages.ok;
 import static helper.ErrorMessages.unknownError;
-import static helper.LoggerHelper.responseCreating;
-import static helper.LoggerHelper.resultUpdate;
+import static helper.LoggerHelper.*;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class ThreadCreateServlet extends HttpServlet {
@@ -28,14 +26,14 @@ public class ThreadCreateServlet extends HttpServlet {
 
     private MySqlConnect mySqlServer;
 
-    public ThreadCreateServlet(MySqlConnect mySqlServer) {
-        // this.mySqlServer = mySqlServer;
+    public ThreadCreateServlet() {
+        this.mySqlServer = new MySqlConnect();
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        logger.info(LoggerHelper.start());
-        mySqlServer = new MySqlConnect(true);
+        logger.info(start());
+        mySqlServer.init();
         JSONObject req = getJSONFromRequest(request, "ThreadCreate");
         boolean isDeleted = false;
         if (req.containsKey("isDeleted")) {
@@ -91,7 +89,7 @@ public class ThreadCreateServlet extends HttpServlet {
         }
         mySqlServer.closeExecution(resultSet, statement);
         mySqlServer.close();
-        logger.info(LoggerHelper.finish());
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, short status, String message, ResultSet resultSet) throws IOException, SQLException {

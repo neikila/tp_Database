@@ -16,9 +16,7 @@ import java.util.Properties;
 
 public class ConnectionPool  {
     private final String DRIVER = "com.mysql.jdbc.Driver";
-    private final String URL = "jdbc:mysql://localhost:3306/SMDB";
-    private final String USERNAME = "admin";
-    private final String PASSWORD = "subd_project";
+    private final String URL = "jdbc:mysql://localhost:3306/SMDB_test";
 
     private GenericObjectPool connectionPool = null;
     private DataSource dataSource = null;
@@ -33,25 +31,12 @@ public class ConnectionPool  {
     }
 
     public void setUp() throws Exception {
-        //
-        // Load JDBC Driver class.
-        //
 
         Class.forName(DRIVER).newInstance();
 
-        //
-        // Creates an instance of GenericObjectPool that holds our
-        // pool of connections object.
-        //
-
         connectionPool = new GenericObjectPool();
-        connectionPool.setMaxActive(10);
+        connectionPool.setMaxActive(2);
 
-        //
-        // Creates a connection factory object which will be use by
-        // the pool to create the connection object. We passes the
-        // JDBC url info, username and password.
-        //
         Properties properties=new Properties();
         properties.setProperty("user","admin");
         properties.setProperty("password","subd_project");
@@ -62,11 +47,6 @@ public class ConnectionPool  {
                 URL,
                 properties);
 
-        //
-        // Creates a PoolableConnectionFactory that will wraps the
-        // connection object created by the ConnectionFactory to add
-        // object pooling functionality.
-        //
         new PoolableConnectionFactory(cf, connectionPool, null, null, false, true);
         dataSource = new PoolingDataSource(connectionPool);
     }

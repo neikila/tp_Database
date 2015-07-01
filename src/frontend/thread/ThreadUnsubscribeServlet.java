@@ -24,14 +24,14 @@ public class ThreadUnsubscribeServlet extends HttpServlet {
 
     private MySqlConnect mySqlServer;
 
-    public ThreadUnsubscribeServlet(MySqlConnect mySqlServer) {
-        // this.mySqlServer = mySqlServer;
+    public ThreadUnsubscribeServlet() {
+        this.mySqlServer = new MySqlConnect();
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(start());
-        mySqlServer = new MySqlConnect(true);
+        mySqlServer.init();
 
         JSONObject req = getJSONFromRequest(request, "ThreadUnsubscribeServlet");
 

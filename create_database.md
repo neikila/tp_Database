@@ -1,8 +1,8 @@
 drop database SMDB;
 
-create database SMDB;
+create database SMDB_test;
 
-use SMDB;
+use SMDB_test;
 
 create table `users` (
 `id` mediumint unsigned auto_increment not null,

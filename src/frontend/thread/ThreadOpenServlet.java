@@ -24,14 +24,14 @@ public class ThreadOpenServlet extends HttpServlet {
 
     private MySqlConnect mySqlServer;
 
-    public ThreadOpenServlet(MySqlConnect mySqlServer) {
-        // this.mySqlServer = mySqlServer;
+    public ThreadOpenServlet() {
+        this.mySqlServer = new MySqlConnect();
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(start());
-        mySqlServer = new MySqlConnect(true);
+        mySqlServer.init();
 
         JSONObject req = getJSONFromRequest(request, "PostCreate");
 

@@ -28,14 +28,14 @@ public class PostListServlet extends HttpServlet {
 
     private MySqlConnect mySqlServer;
 
-    public PostListServlet(MySqlConnect mySqlServer) {
-        // this.mySqlServer = mySqlServer;
+    public PostListServlet() {
+        this.mySqlServer = new MySqlConnect();
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(start());
-        mySqlServer = new MySqlConnect(true);
+        mySqlServer.init();
 
         short status = ok;
         String message = "";
@@ -98,9 +98,11 @@ public class PostListServlet extends HttpServlet {
         if (status != ErrorMessages.ok || resultSet == null) {
             obj.put("response", message);
         } else {
+            mySqlServer.prepareStatementsForPostDetails();
             while (resultSet.next()) {
-                listPosts.add(mySqlServer.getPostDetails(resultSet.getInt("id"), false, false, false));
+                listPosts.add(mySqlServer.getPostDetailsWithPrepareStatement(resultSet.getInt("id"), false, false, false));
             }
+            mySqlServer.closePrepareStatementForPostDetails();
             obj.put("response", listPosts);
         }
         obj.put("code", status);

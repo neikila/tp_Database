@@ -1,6 +1,5 @@
 package frontend;
 
-import helper.LoggerHelper;
 import mysql.MySqlConnect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static helper.LoggerHelper.finish;
 import static helper.LoggerHelper.start;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
@@ -23,14 +23,14 @@ public class ServiceStatusServlet extends HttpServlet {
 
     private MySqlConnect mySqlServer;
 
-    public ServiceStatusServlet(MySqlConnect mySqlServer) {
-        // this.mySqlServer = mySqlServer;
+    public ServiceStatusServlet() {
+        this.mySqlServer = new MySqlConnect();
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(start());
-        mySqlServer = new MySqlConnect(true);
+        mySqlServer.init();
 
         response.setContentType("json;charset=UTF-8");
         response.setHeader("Cache-Control", "no-cache");
@@ -82,7 +82,7 @@ public class ServiceStatusServlet extends HttpServlet {
         obj.put("code", 0);
         response.getWriter().write(obj.toString());
         mySqlServer.close();
-        logger.info(LoggerHelper.finish());
+        logger.info(finish());
     }
 
     private void createResponse(HttpServletResponse response, int result) throws IOException, SQLException {

@@ -26,14 +26,14 @@ public class ForumCreateServlet extends HttpServlet {
 
     private MySqlConnect mySqlServer;
 
-    public ForumCreateServlet(MySqlConnect mySqlServer) {
-        // this.mySqlServer = mySqlServer;
+    public ForumCreateServlet() {
+        this.mySqlServer = new MySqlConnect();
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(start());
-        mySqlServer = new MySqlConnect(true);
+        mySqlServer.init();
         JSONObject req = getJSONFromRequest(request, "ForumCreateServlet");
         short status = ok;
         String message = "";

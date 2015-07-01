@@ -28,14 +28,14 @@ public class UserListFollowerServlet extends HttpServlet {
 
     private MySqlConnect mySqlServer;
 
-    public UserListFollowerServlet(MySqlConnect mySqlServer) {
-        // this.mySqlServer = mySqlServer;
+    public UserListFollowerServlet() {
+        this.mySqlServer = new MySqlConnect();
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(start());
-        mySqlServer = new MySqlConnect(true);
+        mySqlServer.init();
         String email = request.getParameter("user");
         String asc = request.getParameter("order");
         String since_id = request.getParameter("since");

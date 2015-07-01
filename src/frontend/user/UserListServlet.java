@@ -28,14 +28,14 @@ public class UserListServlet extends HttpServlet {
 
     private MySqlConnect mySqlServer;
 
-    public UserListServlet(MySqlConnect mySqlServer) {
-        // this.mySqlServer = mySqlServer;
+    public UserListServlet() {
+        this.mySqlServer = new MySqlConnect();
     }
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(start());
-        mySqlServer = new MySqlConnect(true);
+        mySqlServer.init();
         short status = ok;
         String message = "";
         ResultSet resultSet = null;

@@ -21,20 +21,23 @@ import static helper.ErrorMessages.*;
 import static helper.LoggerHelper.*;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
+import static java.lang.System.currentTimeMillis;
 import static main.JsonInterpreterFromRequest.getJSONFromRequest;
 
 public class PostCreateServlet extends HttpServlet {
     private Logger logger = LogManager.getLogger(PostCreateServlet.class.getName());
     private MySqlConnect mySqlServer;
 
-    public PostCreateServlet(MySqlConnect mySqlServer) {
-        // this.mySqlServer = mySqlServer;
+    public PostCreateServlet() {
+        this.mySqlServer = new MySqlConnect();
     }
 
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         logger.info(start());
-        mySqlServer = new MySqlConnect(true);
+        long a = currentTimeMillis();
+        while (currentTimeMillis() - a < 10) ;
+        mySqlServer.init();
         JSONObject req = getJSONFromRequest(request, "PostCreateServlet");
         short status = ok;
         String message = "";
