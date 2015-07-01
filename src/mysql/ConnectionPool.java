@@ -16,7 +16,7 @@ import java.util.Properties;
 
 public class ConnectionPool  {
     private final String DRIVER = "com.mysql.jdbc.Driver";
-    private final String URL = "jdbc:mysql://localhost:3306/SMDB_test";
+    private final String URL = "jdbc:mysql://localhost:3306/SMDB";
 
     private GenericObjectPool connectionPool = null;
     private DataSource dataSource = null;
@@ -35,7 +35,7 @@ public class ConnectionPool  {
         Class.forName(DRIVER).newInstance();
 
         connectionPool = new GenericObjectPool();
-        connectionPool.setMaxActive(2);
+        connectionPool.setMaxActive(4);
 
         Properties properties=new Properties();
         properties.setProperty("user","admin");

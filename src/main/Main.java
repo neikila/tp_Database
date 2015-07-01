@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         System.out.println(System.getProperty("java.class.path"));
-        int port = 8081;
+        int port = 8080;
         logger.info("Starting at port: {}", String.valueOf(port));
 
         AppServer server = new AppServer(port);

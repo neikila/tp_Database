@@ -1,0 +1,401 @@
+Count: 17568  Time=0.01s (230s)  Lock=0.00s (0s)  Rows=1.0 (17564), admin[admin]@localhost
+  select id, author_id, forum_id, date_of_creating as date, likes, dislikes, isApproved, isDeleted, isEdited, isSpam, isHighlighted, message, parent, thread from post where post.id = N
+
+Count: 13696  Time=0.01s (199s)  Lock=0.00s (0s)  Rows=1.0 (13696), admin[admin]@localhost
+  select parent from post where id = N
+
+Count: 8837  Time=0.13s (1155s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  insert into post set thread = N, message = 'S', author_id = N, date_of_creating = 'S', forum_id = N, parent = 'S', isApproved = N, isHighlighted = N, isEdited = N, isSpam = N, isDeleted = N, name = 'S'
+
+Count: 6825  Time=0.00s (11s)  Lock=0.00s (0s)  Rows=1.1 (7198), admin[admin]@localhost
+  select thread.date_of_creating as date, forum.name as forum, thread.id, isClosed, isDeleted, message, slug, title, email as user from thread join users on founder_id = users.id join forum on forum.id = forum_id where slug = 'S' and forum.short_name = 'S'
+
+Count: 1454  Time=0.05s (71s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update thread set amountOfPost = amountOfPost + N where id = N
+
+Count: 1079  Time=0.00s (3s)  Lock=0.00s (0s)  Rows=0.1 (94), admin[admin]@localhost
+  select email from users use index (id__email) where id = N
+
+Count: 1050  Time=0.02s (16s)  Lock=0.00s (0s)  Rows=17.4 (18278), admin[admin]@localhost
+  select post.id from post where forum_id = forum_id and author_id = N order by date_of_creating desc limit N
+
+Count: 996  Time=0.02s (16s)  Lock=0.00s (0s)  Rows=17.5 (17401), admin[admin]@localhost
+  select post.id from post where forum_id = forum_id and author_id = N order by date_of_creating asc limit N
+
+Count: 670  Time=0.03s (17s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update post set isDeleted = N where thread = N
+
+Count: 653  Time=0.02s (9s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  insert into follow set followee_id = N, follower_id = N
+
+Count: 470  Time=0.01s (5s)  Lock=0.00s (0s)  Rows=1.0 (466), admin[admin]@localhost
+  select * from users where email = 'S'
+
+Count: 446  Time=0.00s (1s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  select thread_id from users join subscribtion on user_id = id where id = N
+
+Count: 390  Time=0.06s (22s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  insert into users set email='S', username='S', name='S', isAnonymous=N, about='S'
+
+Count: 300  Time=0.02s (5s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update thread set amountOfPost = amountOfPost + N where id = (select thread from post where id = N)
+
+Count: 297  Time=0.02s (4s)  Lock=0.00s (0s)  Rows=0.8 (251), admin[admin]@localhost
+  select thread.date_of_creating as date, forum.short_name as forum, short_name, thread.id, isClosed, isDeleted, message, slug, title, email as user, likes, dislikes, amountOfPost from thread join users on founder_id = users.id join forum on forum.id = forum_id where thread.id = N
+
+Count: 296  Time=0.02s (4s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update thread set amountOfPost = amountOfPost - N where id = (select thread from post where id = N)
+
+Count: 293  Time=0.01s (2s)  Lock=0.00s (0s)  Rows=1.0 (289), admin[admin]@localhost
+  select email from users use index (id__email) join follow on followee_id = id where follower_id = N
+
+Count: 189  Time=0.02s (3s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  insert into thread set forum_id = N, title = 'S', isClosed = N, founder_id = N, date_of_creating = 'S', message = 'S', slug = 'S'
+
+Count: 181  Time=0.02s (2s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  insert into thread set forum_id = N, title = 'S', isClosed = N, founder_id = N, date_of_creating = 'S', message = 'S', slug = 'S' , isDeleted = N
+
+Count: 178  Time=0.11s (19s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update post set dislikes = dislikes + N where id = N
+
+Count: 167  Time=0.11s (17s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update post set likes = likes + N where id = N
+
+Count: 164  Time=0.01s (2s)  Lock=0.00s (0s)  Rows=0.9 (154), admin[admin]@localhost
+  select * from users where id = 'S'
+
+Count: 153  Time=0.01s (1s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  insert into subscribtion set user_id = N , thread_id = N
+
+Count: 151  Time=0.01s (1s)  Lock=0.00s (0s)  Rows=1.0 (147), admin[admin]@localhost
+  select id from users where email = 'S'
+
+Count: 142  Time=0.01s (1s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update thread set likes = likes + N where id = N
+
+Count: 142  Time=0.01s (2s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update thread set dislikes = dislikes + N where id = N
+
+Count: 102  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (103), admin[admin]@localhost
+  select post.id from post where forum_id = N and author_id = N and post.date_of_creating = 'S'
+
+Count: 83  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (2), admin[admin]@localhost
+  select forum.id, founder_id, forum.name, short_name, email from forum join users on founder_id = users.id where short_name = 'S'
+
+Count: 49  Time=0.01s (0s)  Lock=0.00s (0s)  Rows=0.8 (40), admin[admin]@localhost
+  select name from users where id = N
+
+Count: 40  Time=0.01s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update thread set isDeleted = N, amountOfPost = N where id = N
+
+Count: 38  Time=0.16s (6s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update post set isDeleted = N where id = N
+
+Count: 33  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  delete from thread
+
+Count: 33  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  delete from post
+
+Count: 33  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  delete from forum
+
+Count: 33  Time=0.03s (1s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  truncate table follow
+
+Count: 33  Time=0.04s (1s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  delete from users
+
+Count: 33  Time=0.01s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update thread set isDeleted = N, amountOfPost = (select count(N) from post where thread = thread.id) where id = N
+
+Count: 33  Time=0.07s (2s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  truncate table subscribtion
+
+Count: 31  Time=0.01s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update thread set message = 'S', slug = 'S' where id = N
+
+Count: 30  Time=0.01s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  insert into forum set founder_id = N, name = 'S', short_name = 'S'
+
+Count: 28  Time=0.02s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update post set message = 'S' where  id = N
+
+Count: 27  Time=0.01s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  update thread set isClosed = N where id = N
+
+Count: 20  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  select short_name from forum where id = N
+
+Count: 12  Time=0.06s (0s)  Lock=0.00s (0s)  Rows=58.3 (700), admin[admin]@localhost
+  select distinct author_id from post p where forum_id = N order by name asc limit N
+
+Count: 10  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  select id from forum where short_name = 'S'
+
+Count: 9  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.1 (1), admin[admin]@localhost
+  select email from users join follow on follower_id = id where followee_id = N
+
+Count: 8  Time=0.02s (0s)  Lock=0.00s (0s)  Rows=0.4 (3), admin[admin]@localhost
+  select email from users join follow on followee_id = id where follower_id = N
+
+Count: 8  Time=0.04s (0s)  Lock=0.00s (0s)  Rows=63.4 (507), admin[admin]@localhost
+  select distinct author_id from post p where forum_id = N order by name desc limit N
+
+Count: 7  Time=0.16s (1s)  Lock=0.00s (0s)  Rows=71.0 (497), admin[admin]@localhost
+  select id from post where thread = N order by date_of_creating asc limit N
+
+Count: 6  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  select name from forum where id = N
+
+Count: 5  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  select email from users use index (id__email) join follow on follower_id = id where followee_id = N
+
+Count: 5  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  select forum.id, founder_id, forum.name, short_name, email from forum join users on founder_id = users.id where forum.id = 'S'
+
+Count: 4  Time=0.08s (0s)  Lock=0.00s (0s)  Rows=73.2 (293), admin[admin]@localhost
+  select id from post where thread = N order by date_of_creating desc limit N
+
+Count: 3  Time=0.07s (0s)  Lock=0.00s (0s)  Rows=1.0 (3), admin[admin]@localhost
+  select count(N) as amount from post
+
+Count: 3  Time=0.01s (0s)  Lock=0.00s (0s)  Rows=48.0 (144), admin[admin]@localhost
+  select id from thread t where forum_id = 'S' order by date_of_creating asc limit N
+
+Count: 3  Time=0.03s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), root[root]@localhost
+  create table `forum` (
+  `id` mediumint unsigned auto_increment not null,
+  `founder_id` mediumint unsigned not null,
+  `name` varchar(N) not null unique ,
+  `short_name` varchar(N) not null unique,
+  `date_of_creating` TIMESTAMP default NOW(),
+  primary key (`id`),
+  key (`short_name`),
+  foreign key(`founder_id`) references `users`(id)
+  ) engine=InnoDB default charset=cp1251
+
+Count: 3  Time=0.02s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), root[root]@localhost
+  create table `follow` (
+  `follower_id` mediumint unsigned not null,
+  `followee_id` mediumint unsigned not null,
+  primary key (`follower_id`, `followee_id`),
+  foreign key(`follower_id`) references `users`(id),
+  foreign key(`followee_id`) references `users`(id)
+  ) engine=InnoDB default charset=cp1251
+
+Count: 3  Time=0.03s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), root[root]@localhost
+  create table `thread` (
+  `id` mediumint unsigned auto_increment not null,
+  `isDeleted` tinyint unsigned not null default 'S',
+  `isClosed` tinyint unsigned not null default 'S',
+  `founder_id` mediumint unsigned not null,
+  `forum_id` mediumint unsigned not null,
+  `message` LONGTEXT not null,
+  `title` char(N) not null,
+  `slug` char(N) not null,
+  `date_of_creating` TIMESTAMP default NOW(),
+  `likes` mediumint default N,
+  `dislikes` mediumint default N,
+  `amountOfPost` mediumint(N) unsigned NOT NULL DEFAULT 'S',
+  primary key (`id`),
+  key `forum_id` (`forum_id`,`date_of_creating`),
+  key `founder_id` (`founder_id`),
+  foreign key(`founder_id`) references `users`(id),
+  foreign key(`forum_id`) references `forum`(id)
+  ) engine=InnoDB default charset=cp1251
+
+Count: 3  Time=0.06s (0s)  Lock=0.00s (0s)  Rows=1.0 (3), root[root]@localhost
+  show table status like 'S'
+
+Count: 3  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (3), root[root]@localhost
+  select count(N) from users
+
+Count: 3  Time=0.02s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), root[root]@localhost
+  create table `subscribtion` (
+  `user_id` mediumint unsigned not null,
+  `thread_id` mediumint unsigned not null,
+  primary key (`user_id`, `thread_id`),
+  key (`user_id`, `thread_id`),
+  foreign key(`user_id`) references `users`(id)
+  ) engine=InnoDB default charset=cp1251
+
+Count: 3  Time=0.02s (0s)  Lock=0.00s (0s)  Rows=1.0 (3), admin[admin]@localhost
+  select count(N) as amount from thread
+
+Count: 3  Time=0.04s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), root[root]@localhost
+  create table `post` (
+  `id` mediumint unsigned auto_increment not null,
+  `isDeleted` tinyint unsigned not null default 'S',
+  `isEdited` tinyint unsigned not null default 'S',
+  `isApproved` tinyint unsigned not null default 'S',
+  `isSpam` tinyint unsigned not null default 'S',
+  `isHighlighted` tinyint unsigned not null default 'S',
+  `author_id` mediumint unsigned not null,
+  `forum_id` mediumint unsigned not null,
+  `thread` mediumint unsigned not null,
+  `parent` varchar(N) not null,
+  `message` LONGTEXT not null,
+  `date_of_creating` TIMESTAMP default NOW(),
+  `likes` mediumint default N,
+  `dislikes` mediumint default N,
+  `name` char(N) not null,
+  primary key (`id`),
+  key `forum_id` (`forum_id`,`author_id`,`date_of_creating`),
+  key `thread` (`thread`,`date_of_creating`),
+  key `author_id` (`author_id`),
+  key `forum_id__name__author_id` (`forum_id`,`name`,`author_id`),
+  key `forum_id__data` (`forum_id`,`date_of_creating`),
+  foreign key(`forum_id`) references `forum`(id),
+  foreign key(`thread`) references `thread`(id)
+  ) engine=InnoDB default charset=cp1251
+
+Count: 3  Time=0.04s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), root[root]@localhost
+  create table `users` (
+  `id` mediumint unsigned auto_increment not null,
+  `email` char(N) not null unique,
+  `username` char(N) not null,
+  `name` char(N) not null,
+  `isAnonymous` tinyint unsigned not null default 'S',
+  `about` TEXT,
+  primary key (`id`),
+  key `id__email` (`id`,`email`)
+  ) engine=InnoDB default charset=cp1251
+
+Count: 2  Time=0.05s (0s)  Lock=0.00s (0s)  Rows=32.5 (65), admin[admin]@localhost
+  select id from post use index (forum_id__data) where forum_id = 'S' order by date_of_creating desc limit N
+
+Count: 2  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (2), admin[admin]@localhost
+  select count(N) as amount from forum
+
+Count: 2  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  select id from users join follow on id = followee_id where follower_id = N order by name desc limit N
+
+Count: 2  Time=0.01s (0s)  Lock=0.00s (0s)  Rows=18.0 (36), admin[admin]@localhost
+  /* mysql-connector-java-N.N.N ( Revision: alexander.soklakov@oracle.com-N-8ukofe1izi0r2b63 ) */SHOW VARIABLES WHERE Variable_name ='S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S' OR Variable_name = 'S'
+
+Count: 2  Time=0.02s (0s)  Lock=0.00s (0s)  Rows=1.0 (2), admin[admin]@localhost
+  select count(N) as amount from users
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (1), root[root]@localhost
+  select id from forum limit N
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (1), root[root]@localhost
+  select email, follower_id from users join follow on follower_id = id limit N
+
+Count: 1  Time=0.05s (0s)  Lock=0.00s (0s)  Rows=31.0 (31), debian-sys-maint[debian-sys-maint]@localhost
+  select concat('S',
+  TABLE_SCHEMA, 'S', TABLE_NAME, 'S') 
+  from information_schema.TABLES where ENGINE='S'
+
+Count: 1  Time=0.01s (0s)  Lock=0.00s (0s)  Rows=47.0 (47), admin[admin]@localhost
+  select id from thread where forum_id = N order by date_of_creating desc limit N
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  select forum_id, founder_id, date_of_creating as date, id, isClosed, isDeleted, message, slug, title, likes, dislikes, amountOfPost from thread where id = N
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=256.0 (256), root[root]@localhost
+  SELECT /*!N SQL_NO_CACHE */ * FROM `forum`
+
+Count: 1  Time=0.02s (0s)  Lock=0.00s (0s)  Rows=1.0 (1), root[root]@localhost
+  SELECT DATABASE()
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=4.0 (4), root[root]@localhost
+  show databases
+
+Count: 1  Time=0.57s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), debian-sys-maint[debian-sys-maint]@localhost
+  select count(*) into @discard from `information_schema`.`PARTITIONS`
+
+Count: 1  Time=0.01s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), debian-sys-maint[debian-sys-maint]@localhost
+  select count(*) into @discard from `information_schema`.`COLUMNS`
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (1), root[root]@localhost
+  select email, followee_id from users join follow on follower_id = id limit N
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), debian-sys-maint[debian-sys-maint]@localhost
+  select count(*) into @discard from `information_schema`.`ROUTINES`
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), debian-sys-maint[debian-sys-maint]@localhost
+  select count(*) into @discard from `information_schema`.`PARAMETERS`
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), debian-sys-maint[debian-sys-maint]@localhost
+  select count(*) into @discard from `information_schema`.`TRIGGERS`
+
+Count: 1  Time=0.01s (0s)  Lock=0.00s (0s)  Rows=13.0 (13), admin[admin]@localhost
+  select id from post use index (forum_id__data) where forum_id = N order by date_of_creating asc limit N
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (1), root[root]@localhost
+  select * from forum limit N
+
+Count: 1  Time=0.06s (0s)  Lock=0.00s (0s)  Rows=10602.0 (10602), root[root]@localhost
+  SELECT /*!N SQL_NO_CACHE */ * FROM `thread`
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), root[root]@localhost
+  SELECT LOGFILE_GROUP_NAME, FILE_NAME, TOTAL_EXTENTS, INITIAL_SIZE, ENGINE, EXTRA FROM INFORMATION_SCHEMA.FILES WHERE FILE_TYPE = 'S' AND FILE_NAME IS NOT NULL AND LOGFILE_GROUP_NAME IN (SELECT DISTINCT LOGFILE_GROUP_NAME FROM INFORMATION_SCHEMA.FILES WHERE FILE_TYPE = 'S' AND TABLESPACE_NAME IN (SELECT DISTINCT TABLESPACE_NAME FROM INFORMATION_SCHEMA.PARTITIONS WHERE TABLE_SCHEMA IN ('S'))) GROUP BY LOGFILE_GROUP_NAME, FILE_NAME, ENGINE ORDER BY LOGFILE_GROUP_NAME
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (1), debian-sys-maint[debian-sys-maint]@localhost
+  SELECT count(*) FROM mysql.user WHERE user='S' and password='S'
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1248.0 (1248), root[root]@localhost
+  SELECT /*!N SQL_NO_CACHE */ * FROM `follow`
+
+Count: 1  Time=0.05s (0s)  Lock=0.00s (0s)  Rows=69.0 (69), admin[admin]@localhost
+  select id from post use index (forum_id__data) where forum_id = 'S' order by date_of_creating asc limit N
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), debian-sys-maint[debian-sys-maint]@localhost
+  select count(*) into @discard from `information_schema`.`PLUGINS`
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), root[root]@localhost
+  SELECT DISTINCT TABLESPACE_NAME, FILE_NAME, LOGFILE_GROUP_NAME, EXTENT_SIZE, INITIAL_SIZE, ENGINE FROM INFORMATION_SCHEMA.FILES WHERE FILE_TYPE = 'S' AND TABLESPACE_NAME IN (SELECT DISTINCT TABLESPACE_NAME FROM INFORMATION_SCHEMA.PARTITIONS WHERE TABLE_SCHEMA IN ('S')) ORDER BY TABLESPACE_NAME, LOGFILE_GROUP_NAME
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), debian-sys-maint[debian-sys-maint]@localhost
+  select count(*) into @discard from `information_schema`.`VIEWS`
+
+Count: 1  Time=0.01s (0s)  Lock=0.00s (0s)  Rows=1.0 (1), admin[admin]@localhost
+  /* mysql-connector-java-N.N.N ( Revision: alexander.soklakov@oracle.com-N-8ukofe1izi0r2b63 ) */SELECT @@session.auto_increment_increment
+
+Count: 1  Time=0.01s (0s)  Lock=0.00s (0s)  Rows=5.0 (5), admin[admin]@localhost
+  select id from post use index (forum_id__data) where forum_id = N and date_of_creating > 'S' order by date_of_creating desc
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (1), root[root]@localhost
+  select email from users join follow on followee_id = id limit N
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (1), admin[admin]@localhost
+  select id from thread where founder_id = N and date_of_creating > 'S' order by date_of_creating desc
+
+Count: 1  Time=0.84s (0s)  Lock=0.00s (0s)  Rows=94893.0 (94893), root[root]@localhost
+  SELECT /*!N SQL_NO_CACHE */ * FROM `users`
+
+Count: 1  Time=0.03s (0s)  Lock=0.00s (0s)  Rows=38.0 (38), admin[admin]@localhost
+  select id from post use index (forum_id__data) where forum_id = N order by date_of_creating desc limit N
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), debian-sys-maint[debian-sys-maint]@localhost
+  select count(*) into @discard from `information_schema`.`EVENTS`
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  select id from thread where founder_id = N order by date_of_creating asc limit N
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), debian-sys-maint[debian-sys-maint]@localhost
+  select count(*) into @discard from `information_schema`.`PROCESSLIST`
+
+Count: 1  Time=0.04s (0s)  Lock=0.00s (0s)  Rows=99.0 (99), admin[admin]@localhost
+  select id from thread where forum_id = N order by date_of_creating asc limit N
+
+Count: 1  Time=0.02s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), root[root]@localhost
+  show create table thread
+
+Count: 1  Time=11.67s (11s)  Lock=0.00s (0s)  Rows=1000569.0 (1000569), root[root]@localhost
+  SELECT /*!N SQL_NO_CACHE */ * FROM `post`
+
+Count: 1  Time=0.01s (0s)  Lock=15.03s (15s)  Rows=0.0 (0), root[root]@localhost
+  drop database SMDB
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (1), root[root]@localhost
+  select email, follower_id from users join follow on followee_id = id limit N
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1282.0 (1282), root[root]@localhost
+  SELECT /*!N SQL_NO_CACHE */ * FROM `subscribtion`
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), admin[admin]@localhost
+  select id, founder_id, name, short_name from forum where forum.id = N
+
