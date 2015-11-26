@@ -87,3 +87,10 @@ primary key (`user_id`, `thread_id`),
 key (`user_id`, `thread_id`),
 foreign key(`user_id`) references `users`(id)
 ) engine=InnoDB default charset=cp1251;
+
+
+
+CREATE USER 'admin'@'localhost' IDENTIFIED BY
+'subd_project';
+GRANT ALL ON SMDB.* TO 'admin'@'localhost';
+
