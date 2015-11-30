@@ -94,3 +94,10 @@ CREATE USER 'admin'@'localhost' IDENTIFIED BY
 'subd_project';
 GRANT ALL ON SMDB.* TO 'admin'@'localhost';
 
+
+delete from post;
+delete from thread;
+delete from forum;
+delete from subscribtion;
+delete from follow;
+delete from users;
