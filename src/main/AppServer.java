@@ -14,6 +14,7 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlet.StatisticsServlet;
 
 import javax.servlet.Servlet;
 
@@ -26,6 +27,8 @@ public class AppServer {
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         String entity = "service";
         addServletToContext(context, new AdminServlet(), entity, "admin");
+        addServletToContext(context, new StatisticServlet(), entity, "stats");
+        addServletToContext(context, new StatisticsServlet(), entity, "stats_jetty");
         context.addServlet(new ServletHolder(new ServiceClearServlet()), "/db/api/clear/");
         context.addServlet(new ServletHolder(new ServiceShutDownServlet()), "/shutDown");
         context.addServlet(new ServletHolder(new ServiceStatusServlet()), "/db/api/status/");
