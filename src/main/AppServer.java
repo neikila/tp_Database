@@ -1,9 +1,6 @@
 package main;
 
-import frontend.AdminServlet;
-import frontend.ServiceClearServlet;
-import frontend.ServiceShutDownServlet;
-import frontend.ServiceStatusServlet;
+import frontend.*;
 import frontend.forum.*;
 import frontend.post.*;
 import frontend.thread.*;

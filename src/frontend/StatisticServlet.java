@@ -1,7 +1,8 @@
-package frontend.user;
+package frontend;
 
 
 import helper.CommonHelper;
+import mysql.MySqlConnect;
 import org.json.simple.JSONObject;
 
 import javax.servlet.ServletException;
@@ -22,6 +23,8 @@ public class StatisticServlet extends HttpServlet {
         obj.put("memory_free", runtime.freeMemory());
         obj.put("memory_total", runtime.totalMemory());
         obj.put("memory_max", runtime.maxMemory());
+        obj.put("rps", MySqlConnect.rps);
+        obj.put("request_counter", MySqlConnect.requestCounter);
         response.getWriter().write(obj.toString());
     }
 

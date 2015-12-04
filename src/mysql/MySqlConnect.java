@@ -13,6 +13,7 @@ import org.json.simple.JSONObject;
 
 import java.io.IOException;
 import java.sql.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class MySqlConnect {
     private static Logger logger = LogManager.getLogger(MySqlConnect.class.getName());
@@ -24,7 +25,11 @@ public class MySqlConnect {
     public MySqlConnect() {
     }
 
+    public static AtomicLong requestCounter = new AtomicLong(0);
+    public static AtomicLong rps = new AtomicLong(0);
+
     public void init() {
+        requestCounter.incrementAndGet();
         this.connection = connectionPool.getConnection();
     }
 
