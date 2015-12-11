@@ -2,6 +2,7 @@ package frontend;
 
 
 import helper.CommonHelper;
+import main.Main;
 import mysql.MySqlConnect;
 import org.json.simple.JSONObject;
 
@@ -25,6 +26,9 @@ public class StatisticServlet extends HttpServlet {
         obj.put("memory_max", runtime.maxMemory());
         obj.put("rps", MySqlConnect.rps);
         obj.put("request_counter", MySqlConnect.requestCounter);
+
+        obj.put("cpuUs", Main.cpuUs);
+
         response.getWriter().write(obj.toString());
     }
 
